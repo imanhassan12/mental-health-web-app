@@ -1,70 +1,68 @@
-# Getting Started with Create React App
+# Mental Health Web App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+**Mental Health Web App** is an innovative, minimalistic web application designed to help users track their mood, reflect on their day, and ultimately improve their mental well-being. The app provides a daily check-in feature along with plans to integrate guided DBT/CBT exercises, audio journaling, and progress tracking. Our goal is to create a user-friendly tool that not only looks beautiful but also provides practical, evidence-based mental health support.
 
-In the project directory, you can run:
+## Vision & Scope
 
-### `npm start`
+- **Vision:** Empower users to gain insights into their emotional patterns and practice healthy coping strategies using a modern, aesthetically pleasing interface.
+- **Scope:**  
+  - **Core Features:**  
+    - **Daily Check-In:** Quickly record mood and add an optional note.
+    - **Dashboard:** View recent check-ins and receive personalized tips.
+  - **Planned Features:**  
+    - **Skills Library:** Guided DBT/CBT exercises.
+    - **Audio Journal:** Record and review audio reflections.
+    - **Progress Tracking:** Visualize mood trends over time.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **User-Friendly Interface:** Clean, minimalistic design inspired by top mental health apps.
+- **Responsive Design:** Works well on desktops, tablets, and mobile devices.
+- **Future Enhancements:** Expandable modules for guided exercises, audio journaling, and detailed progress analytics.
 
-### `npm test`
+## Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Frontend:**  
+  - React (with Create React App)
+  - Bootstrap for responsive, modern design
+  - Custom CSS & React Icons for a minimalistic look
+- **Backend:**  
+  - Node.js with Express for lightweight, scalable API endpoints
+- **Version Control:**  
+  - Git & GitHub for collaboration and code management
 
-### `npm run build`
+## Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/imanhassan12/mental-health-web-app.git
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+In install Dependencies for the Client
+  cd mental-health-web-app/client
+  npm install
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Install Dependencies for the Server:
+  cd ../server
+  npm install
 
-### `npm run eject`
+ Usage: Start the Backend:
+In the terminal, navigate to the server directory and run:
+npx nodemon server.js
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+ Start the Frontend:
+In a separate terminal, navigate to the client directory and run: 
+ npm start
+ 
+ Future Enhancements
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Audio Journaling: Develop functionality for recording, playing back, and uploading audio entries.
+Guided DBT/CBT Exercises: Build a comprehensive skills library with interactive exercises.
+Progress Tracking: Integrate data visualization to help users monitor mood trends over time.
+User Authentication: Implement user accounts and database integration for personalized experiences.
+Contributing
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Contributions are welcome! 
+Please fork the repository and submit a pull request. For major changes, open an issue first to discuss what you would like to change.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
