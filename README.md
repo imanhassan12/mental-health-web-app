@@ -1,8 +1,8 @@
-# Mental Health Web App
+# Mental Health Aide
 
 ## Overview
 
-**Mental Health Web App** is an innovative, minimalistic web application designed to help users track their mood, reflect on their day, and ultimately improve their mental well-being. The app provides a **daily check-in feature** along with plans to integrate **guided DBT/CBT exercises, audio journaling, and progress tracking**. 
+**Mental Health Aide** is an innovative, minimalistic web application designed to help users track their mood, reflect on their day, and ultimately improve their mental well-being. The app provides a **daily check-in feature** along with plans to integrate **guided DBT/CBT exercises, audio journaling, and progress tracking**. 
 
 Our goal is to create a user-friendly tool that provides practical, evidence-based mental health support.
 
@@ -47,42 +47,42 @@ Empower users to gain insights into their emotional patterns and practice health
 - 🔄 Git & GitHub for collaboration and code management
 
 ---
-
 ## Installation
 
-### **1️⃣ Clone the Repository**
+### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/imanhassan12/mental-health-web-app.git
-
-2️⃣ Install Dependencies
----
-***Client (Frontend)***
-
-```bash 
-cd mental-health-web-app/client
-npm install 
 ```
----
 
-***Server (Backend)***
+### 2️⃣ Install Dependencies
 
+#### Client (Frontend)
+```bash
+cd mental-health-web-app/client
+npm install
+```
+
+#### Server (Backend)
 ```bash
 cd ../server
 npm install
 ```
----
 
-Usage
+## Usage
 
-Start the Backend
+### Start the Backend
+
 Navigate to the server directory and run:
-
+```bash
 cd server
-npm install # Ensure dependencies are installed
+npm install  # Ensure dependencies are installed
 npx nodemon server.js
+```
 
-Start the Frontend
+### Start the Frontend
+
 In a separate terminal, navigate to the client directory and run:
-
+```bash
 cd client
 npm start
+```
