@@ -53,15 +53,24 @@ Empower users to gain insights into their emotional patterns and practice health
 ### **1️⃣ Clone the Repository**
 ```bash
 git clone https://github.com/imanhassan12/mental-health-web-app.git
+
 2️⃣ Install Dependencies
-Client (Frontend)
+---
+***Client (Frontend)***
 
+```bash 
 cd mental-health-web-app/client
-npm install
-Server (Backend)
+npm install 
+```
+---
 
+***Server (Backend)***
+
+```bash
 cd ../server
 npm install
+```
+---
 
 Usage
 
@@ -69,6 +78,7 @@ Start the Backend
 Navigate to the server directory and run:
 
 cd server
+npm install # Ensure dependencies are installed
 npx nodemon server.js
 
 Start the Frontend
