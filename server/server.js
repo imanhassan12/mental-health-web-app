@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
 
 // In production, store this key in an environment variable!
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SECRET_KEY';
@@ -120,4 +120,19 @@ app.post('/api/login', async (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+});
+app.get("/", (req, res) => {
+  res.json({ message: "Backend is running successfully!" });
+});
+app.post('/api/checkin', (req, res) => {
+  const { mood, message } = req.body;
+
+  if (!mood) {
+      return res.status(400).json({ message: "Mood is required." });
+  }
+
+  // Simulate saving the check-in (Replace with actual DB logic)
+  console.log(`New check-in: Mood - ${mood}, Message - ${message}`);
+
+  res.status(200).json({ message: "Check-in successful!" });
 });
