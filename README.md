@@ -2,20 +2,20 @@
 
 ## Overview
 
-**Mental Health Practitoner Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins,treatment goal tracking, note logging,and actiionable insights.** By replacing outdated paper-based systems with a modern. integrated digital solutin, out app empowers practitioners to make data-driven decisions and enhance treatment outcomese. 
+**Mental Health Practitoner Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins,treatment goal tracking, note logging,and actionable insights.** By replacing outdated paper-based systems with a modern. integrated digital solutin, out app empowers practitioners to make data-driven decisions and enhance treatment outcomese. 
 
 ---
 
 ## Vision & Scope
 
 ### **Vision**
-Empower mental health practitioners with a secure, integrated, and user-friendlt platdorm for comprehensive client management, enabling better tracking of client progress and improved treatment outcomes.
+Empower mental health practitioners with a secure, integrated, and user-friendly platdorm for comprehensive client management, enabling better tracking of client progress and improved treatment outcomes.
 
 ### **Scope**
 #### ✅ **Core Features:**
 - **Secure Practitoner Login:** Rle-based authentication ensures that only authorized practitoners can access client data.
 - **Client Management Dashboard:** View and manage detailed client profiles, including mood, check-ins, session notes, and treatment goals.
-- **Daily Check-ins:**Record client mood and session observations to track progress over time.
+- **Daily Check-ins:** Record client mood and session observations to track progress over time.
 - **Goal Setting & Monitoring:** Establish and monitor treatment goals to support client improvement.
 - **Integrated Analytics:** Visualize client data trends to gain actionable insights.
 - **Secure Communication:** Send reminders and real-time notifications to ensure proactive engagement.
