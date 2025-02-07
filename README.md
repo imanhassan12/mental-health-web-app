@@ -1,8 +1,8 @@
-# Mental Health Aide
+# Mental Health Practioner Aide
 
 ## Overview
 
-**Mental Health Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins,treatment goal tracking, note logging,and actiionable insights.** By replacing outdated paper-based systems with a modern. integrated digital solutin, out app empowers practitioners to make data-driven decisions and enhance treatment outcomese. 
+**Mental Health Practitoner Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins,treatment goal tracking, note logging,and actiionable insights.** By replacing outdated paper-based systems with a modern. integrated digital solutin, out app empowers practitioners to make data-driven decisions and enhance treatment outcomese. 
 
 ---
 
