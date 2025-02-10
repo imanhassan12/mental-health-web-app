@@ -1,0 +1,33 @@
+.goals-panel {
+  background: var(--card-background);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+
+.goals-panel ul {
+  list-style: none;
+  padding: 0;
+}
+
+.goals-panel li {
+  margin-bottom: 15px;
+}
+
+.progress-bar {
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.progress {
+  background: var(--accent);
+  color: #fff;
+  padding: 5px;
+  text-align: center;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 5px;
+}

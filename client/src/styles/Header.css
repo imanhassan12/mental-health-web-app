@@ -1,0 +1,45 @@
+/* client/src/styles/Header.css */
+
+/* A minimal top header with brand on left, logout on right */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #45c9cc, #1479b8);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Brand text in the top-left */
+.header__brand {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* if you had future icons, for example */
+}
+
+/* Logout button styling */
+.header__logout {
+  background: transparent;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s ease;
+}
+
+.header__logout:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

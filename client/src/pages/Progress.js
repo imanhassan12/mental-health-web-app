@@ -1,10 +1,11 @@
 import React from 'react';
+import '../styles/Progress.css';
 
 const Progress = () => {
   return (
-    <div className="container my-4">
+    <div className="progress-page">
       <h2>Progress Tracker</h2>
-      <p>Coming soon – view trends and insights from your check-ins over time.</p>
+      <p>This feature is under construction.</p>
     </div>
   );
 };

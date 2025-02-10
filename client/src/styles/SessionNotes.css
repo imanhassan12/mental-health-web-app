@@ -1,0 +1,41 @@
+/* client/src/styles/SessionNotes.css */
+
+.session-notes-page {
+  padding: 20px;
+}
+
+.session-notes-page h2 {
+  margin-bottom: 20px;
+}
+
+.session-note-form .form-group {
+  margin-bottom: 15px;
+}
+
+.session-note-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.session-note-form input[type="number"],
+.session-note-form textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.session-note-form button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #38c5b4; /*  teal shade */
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.session-note-form button:hover {
+  background-color: #2aa09b;
+}

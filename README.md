@@ -27,10 +27,12 @@ Empower mental health practitioners with a secure, integrated, and user-friendly
 
 ## Features
 
-- **User-Friendly Interface:** Clean, minimalistic design tailored for busy practitoners. 
-- **Secure & Compliant:** Robust authentication and data privacy measures that meet healthcare standards.
-- **Data-Driven Insights:** Integrated analytics support informed clinical decision-making.
-- **Scalable Architecture** Built with modern web technologies and hosted on scalable cloud infrastructure.
+- **Secure Practitoner Login :** Role-based authentication to ensure private data remains protected. 
+- **Client Management Dashboard**  Unified interface for viewing/editing client profiles, mood-checkins, and goals.
+- **Goal Setting and Monitoring** Create measureable treatment goals, track progress over time.
+- **Session Notes** Easily capture session summaries, structured notes, and attach them to a client's profile. 
+- **Appointment & Scheduling** - Schedule and manage client appointments with status updates
+- **Resources** - Skills Library that include DBT/CBT exercises for clients. 
 
 ---
 

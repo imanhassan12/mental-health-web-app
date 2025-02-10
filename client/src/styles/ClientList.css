@@ -1,0 +1,29 @@
+.client-list {
+  background: var(--card-background);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+
+.client-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.client-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.client-name {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.client-checkin,
+.client-mood {
+  display: block;
+  font-size: 0.95em;
+  color: var(--subtext-color);
+}

@@ -1,0 +1,23 @@
+.overview-panel {
+  background: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.overview-metrics {
+  display: flex;
+  gap: 20px;
+}
+
+.metric-card {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  flex: 1;
+  text-align: center;
+}
+
+.alerts {
+  margin-top: 15px;
+}

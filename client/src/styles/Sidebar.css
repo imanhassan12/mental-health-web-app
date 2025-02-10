@@ -1,0 +1,47 @@
+/* client/src/styles/Sidebar.css */
+
+/* Sidebar Container with a matching gradient */
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #45c9cc, #1479b8); /* Matching the header's colors */
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0; /* so it stays aligned with the header */
+  padding-top: 20px;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.sidebar__link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 8px 0;
+  border-radius: 4px;
+  transition: background 0.3s, color 0.3s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Helps white text pop on gradient */
+}
+
+.sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.sidebar {
+  width: 220px;
+  background: linear-gradient(135deg, #1479b8, #45c9cc);
+  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+  padding-top: 20px;
+  /* ... */
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 16px 20px;
+}

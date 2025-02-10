@@ -1,0 +1,17 @@
+.progress-page {
+  padding: 40px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.progress-page h2 {
+  font-size: 2rem;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.progress-page p {
+  text-align: center;
+  color: #555;
+}

@@ -1,10 +1,11 @@
 import React from 'react';
+import '../styles/SkillsPage.css';
 
 const SkillsPage = () => {
   return (
-    <div className="container my-4">
+    <div className="skills-page">
       <h2>Skills Library</h2>
-      <p>Coming soon – a curated list of DBT/CBT skills and guided exercises.</p>
+      <p>This feature is under construction.</p>
     </div>
   );
 };

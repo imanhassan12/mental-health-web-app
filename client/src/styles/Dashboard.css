@@ -1,0 +1,142 @@
+/* client/src/styles/Dashboard.css */
+
+/* Overall dashboard container */
+.dashboard-page {
+  padding: 20px;
+  background: #f5f8fb; /* Align with your brand theme */
+}
+
+/* Title for the main section */
+.dashboard-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #2e3d49;
+}
+
+/* Stats row with small metric cards */
+.dashboard-stats-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: #fff;
+  flex: 1;
+  min-width: 120px;
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card h3 {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2aa09b; /* teal accent for key numbers */
+}
+
+/* Alerts or Risky Clients */
+.alerts-section {
+  margin-bottom: 30px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.alerts-section h3 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+/* Lower row for multiple cards */
+.dashboard-lower-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Generic card for the rest of the sections (Clients, Mood Trends, etc.) */
+.dashboard-card {
+  background: #fff;
+  flex: 1;
+  min-width: 250px; /* to handle smaller screens */
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+}
+
+.dashboard-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+/* Goals styling */
+.goal-item {
+  margin-bottom: 12px;
+}
+
+.goal-bar {
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+  height: 10px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.goal-bar-fill {
+  background: #ff6f61; /* coral accent for progress */
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.goal-progress {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Links inside the card */
+.dashboard-card a {
+  display: inline-block;
+  margin-top: 8px;
+  color: #2aa09b;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.dashboard-card a:hover {
+  color: #248f8b;
+}
+
+/* Additional styling for lists, etc. */
+.dashboard-card ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.dashboard-card li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}

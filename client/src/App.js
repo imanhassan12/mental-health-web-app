@@ -1,26 +1,14 @@
-// client/src/AppRouter.js
+// App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import CheckInPage from './pages/CheckInPage';
-import SkillsPage from './pages/SkillsPage';
-import AudioJournal from './pages/AudioJournal';
-import Progress from './pages/Progress';
-import NavBar from './components/NavBar';
+import AppRouter from './AppRouter';
+import './styles/App.css';    // your global styling or theming
 
-const AppRouter = () => {
+function App() {
   return (
-    <Router>
-      <NavBar />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/checkin" element={<CheckInPage />} />
-        <Route path="/skills" element={<SkillsPage />} />
-        <Route path="/audio" element={<AudioJournal />} />
-        <Route path="/progress" element={<Progress />} />
-      </Routes>
-    </Router>
+    <div className="App">
+      <AppRouter />
+    </div>
   );
-};
+}
 
-export default AppRouter;
+export default App;

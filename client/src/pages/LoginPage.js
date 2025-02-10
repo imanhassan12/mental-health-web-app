@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaUser, FaLock, FaRegSmile } from 'react-icons/fa';
-import './LoginPage.css';
+import '../styles/LoginPage.css';
 
 const LoginPage = () => {
   // Toggle between Login and Create Account views
@@ -30,8 +30,7 @@ const LoginPage = () => {
       const data = await res.json();
       if (res.ok) {
         setLoginMessage('Logged in successfully!');
-        // TODO: Save user state (e.g., via Context, Redux or localStorage)
-        // Redirect to the Dashboard or main page
+        // Redirect or update app state
         window.location.href = '/';
       } else {
         setLoginMessage(data.message || 'Incorrect username or password.');
@@ -77,8 +76,10 @@ const LoginPage = () => {
     <div className="login-page">
       <div className="login-card">
         <h2>{isLogin ? 'Welcome Back' : 'Create Your Account'}</h2>
+
         {isLogin ? (
           <form onSubmit={handleLogin}>
+            {/* Username Field */}
             <div className="form-group">
               <label>
                 <FaUser className="icon" /> Username
@@ -90,6 +91,8 @@ const LoginPage = () => {
                 onChange={(e) => setLoginUsername(e.target.value)}
               />
             </div>
+
+            {/* Password Field */}
             <div className="form-group">
               <label>
                 <FaLock className="icon" /> Password
@@ -101,18 +104,27 @@ const LoginPage = () => {
                 onChange={(e) => setLoginPassword(e.target.value)}
               />
             </div>
+
+            {/* Error/Success Message */}
             {loginMessage && <div className="message">{loginMessage}</div>}
+
             <button type="submit" className="btn primary">Login</button>
+
             <p className="toggle">
-              Don't have an account?{' '}
-              <span onClick={() => {
-                setIsLogin(false);
-                setLoginMessage('');
-              }}>Create Account</span>
+              Don’t have an account?{' '}
+              <span
+                onClick={() => {
+                  setIsLogin(false);
+                  setLoginMessage('');
+                }}
+              >
+                Create Account
+              </span>
             </p>
           </form>
         ) : (
           <form onSubmit={handleCreateAccount}>
+            {/* First Name */}
             <div className="form-group">
               <label>
                 <FaRegSmile className="icon" /> First Name
@@ -124,6 +136,8 @@ const LoginPage = () => {
                 onChange={(e) => setFirstName(e.target.value)}
               />
             </div>
+
+            {/* Last Name */}
             <div className="form-group">
               <label>
                 <FaRegSmile className="icon" /> Last Name
@@ -135,6 +149,8 @@ const LoginPage = () => {
                 onChange={(e) => setLastName(e.target.value)}
               />
             </div>
+
+            {/* Username */}
             <div className="form-group">
               <label>
                 <FaUser className="icon" /> Username
@@ -146,6 +162,8 @@ const LoginPage = () => {
                 onChange={(e) => setNewUsername(e.target.value)}
               />
             </div>
+
+            {/* Password */}
             <div className="form-group">
               <label>
                 <FaLock className="icon" /> Password
@@ -157,14 +175,24 @@ const LoginPage = () => {
                 onChange={(e) => setNewPassword(e.target.value)}
               />
             </div>
-            {createAccountMessage && <div className="message">{createAccountMessage}</div>}
+
+            {/* Error/Success Message */}
+            {createAccountMessage && (
+              <div className="message">{createAccountMessage}</div>
+            )}
+
             <button type="submit" className="btn primary">Sign Up</button>
+
             <p className="toggle">
               Already have an account?{' '}
-              <span onClick={() => {
-                setIsLogin(true);
-                setCreateAccountMessage('');
-              }}>Login</span>
+              <span
+                onClick={() => {
+                  setIsLogin(true);
+                  setCreateAccountMessage('');
+                }}
+              >
+                Login
+              </span>
             </p>
           </form>
         )}
