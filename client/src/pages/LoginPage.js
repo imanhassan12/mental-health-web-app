@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaLock, FaRegSmile } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
+import AuthService from '../services/auth.service';
 import '../styles/LoginPage.css';
 
 const LoginPage = () => {
+  // For navigation after login
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the redirect path from location state or default to dashboard
+  const from = location.state?.from || '/';
+  
   // Toggle between Login and Create Account views
   const [isLogin, setIsLogin] = useState(true);
 
@@ -10,6 +19,7 @@ const LoginPage = () => {
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Create account state
   const [firstName, setFirstName] = useState('');
@@ -18,26 +28,31 @@ const LoginPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [createAccountMessage, setCreateAccountMessage] = useState('');
 
+  // Check if user is already logged in
+  useEffect(() => {
+    if (AuthService.isAuthenticated()) {
+      navigate('/');
+    }
+  }, [navigate]);
+
   // Handle Login submission
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: loginUsername, password: loginPassword }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setLoginMessage('Logged in successfully!');
-        // Redirect or update app state
-        window.location.href = '/';
-      } else {
-        setLoginMessage(data.message || 'Incorrect username or password.');
-      }
+      await AuthService.login(loginUsername, loginPassword);
+      setLoginMessage('Logged in successfully!');
+      
+      // Use React Router's navigate for better SPA navigation
+      // Redirect to the page they were trying to access or the dashboard
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Error during login:', error);
-      setLoginMessage('An error occurred. Please try again.');
+      setLoginMessage(
+        error.response?.data?.message || 'Incorrect username or password.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,27 +63,25 @@ const LoginPage = () => {
       setCreateAccountMessage('Please fill in all fields.');
       return;
     }
+    setIsLoading(true);
     try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          username: newUsername,
-          password: newPassword,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setCreateAccountMessage('Account created successfully. You can now log in.');
-        setIsLogin(true);
-      } else {
-        setCreateAccountMessage(data.message || 'Registration failed. Please try again.');
-      }
+      const userData = {
+        name: `${firstName} ${lastName}`,
+        username: newUsername,
+        password: newPassword,
+        email: `${newUsername}@example.com`, // This should be changed in a real app
+      };
+      
+      await AuthService.register(userData);
+      setCreateAccountMessage('Account created successfully. You can now log in.');
+      setIsLogin(true);
     } catch (error) {
       console.error('Error during registration:', error);
-      setCreateAccountMessage('An error occurred. Please try again.');
+      setCreateAccountMessage(
+        error.response?.data?.message || 'Registration failed. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,6 +102,7 @@ const LoginPage = () => {
                 placeholder="Enter your username"
                 value={loginUsername}
                 onChange={(e) => setLoginUsername(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -102,16 +116,19 @@ const LoginPage = () => {
                 placeholder="Enter your password"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
             {/* Error/Success Message */}
             {loginMessage && <div className="message">{loginMessage}</div>}
 
-            <button type="submit" className="btn primary">Login</button>
+            <button type="submit" className="btn primary" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
 
             <p className="toggle">
-              Don’t have an account?{' '}
+              Don't have an account?{' '}
               <span
                 onClick={() => {
                   setIsLogin(false);
@@ -134,6 +151,7 @@ const LoginPage = () => {
                 placeholder="Your first name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -147,6 +165,7 @@ const LoginPage = () => {
                 placeholder="Your last name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -160,6 +179,7 @@ const LoginPage = () => {
                 placeholder="Choose a username"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -173,6 +193,7 @@ const LoginPage = () => {
                 placeholder="Choose a password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -181,7 +202,9 @@ const LoginPage = () => {
               <div className="message">{createAccountMessage}</div>
             )}
 
-            <button type="submit" className="btn primary">Sign Up</button>
+            <button type="submit" className="btn primary" disabled={isLoading}>
+              {isLoading ? 'Creating Account...' : 'Sign Up'}
+            </button>
 
             <p className="toggle">
               Already have an account?{' '}

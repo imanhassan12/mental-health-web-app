@@ -1,58 +1,77 @@
 // server/routes/clients.js
 const express = require('express');
 const router = express.Router();
-
-let clients = [
-  // Example data
-  { id: '1', name: 'Alice', phone: '555-1234', notes: 'High anxiety, weekly sessions' },
-  { id: '2', name: 'Bob', phone: '555-5678', notes: 'Moderate depression, check-ins every 2 weeks' },
-];
+const { Client } = require('../models');
 
 // GET all clients
-router.get('/', (req, res) => {
-  res.json(clients);
+router.get('/', async (req, res) => {
+  try {
+    const clients = await Client.findAll();
+    res.json(clients);
+  } catch (error) {
+    console.error('Error fetching clients:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 // GET single client
-router.get('/:id', (req, res) => {
-  const client = clients.find(c => c.id === req.params.id);
-  if (!client) return res.status(404).json({ message: 'Client not found' });
-  res.json(client);
+router.get('/:id', async (req, res) => {
+  try {
+    const client = await Client.findByPk(req.params.id);
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+    res.json(client);
+  } catch (error) {
+    console.error('Error fetching client:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 // CREATE new client
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, phone, notes } = req.body;
   if (!name) {
     return res.status(400).json({ message: 'Name is required' });
   }
-  const newClient = {
-    id: String(Date.now()), // simple unique ID
-    name,
-    phone: phone || '',
-    notes: notes || '',
-  };
-  clients.push(newClient);
-  res.status(201).json(newClient);
+  
+  try {
+    const newClient = await Client.create({
+      name,
+      phone: phone || '',
+      notes: notes || '',
+    });
+    res.status(201).json(newClient);
+  } catch (error) {
+    console.error('Error creating client:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 // UPDATE client
-router.put('/:id', (req, res) => {
-  const index = clients.findIndex(c => c.id === req.params.id);
-  if (index === -1) return res.status(404).json({ message: 'Client not found' });
-
-  const existingClient = clients[index];
-  const updatedClient = { ...existingClient, ...req.body };
-  clients[index] = updatedClient;
-  res.json(updatedClient);
+router.put('/:id', async (req, res) => {
+  try {
+    const client = await Client.findByPk(req.params.id);
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+    
+    await client.update(req.body);
+    res.json(client);
+  } catch (error) {
+    console.error('Error updating client:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 // DELETE client
-router.delete('/:id', (req, res) => {
-  const index = clients.findIndex(c => c.id === req.params.id);
-  if (index === -1) return res.status(404).json({ message: 'Client not found' });
-  clients.splice(index, 1);
-  res.json({ message: 'Client deleted' });
+router.delete('/:id', async (req, res) => {
+  try {
+    const client = await Client.findByPk(req.params.id);
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+    
+    await client.destroy();
+    res.json({ message: 'Client deleted' });
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 module.exports = router;

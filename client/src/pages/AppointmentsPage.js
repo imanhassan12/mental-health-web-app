@@ -1,11 +1,17 @@
 // client/src/pages/AppointmentsPage.js
 import React, { useEffect, useState, useRef } from 'react';
-import '../styles/AppointmentsPage.css'; // make sure this path is correct
+import AppointmentService from '../services/appointment.service';
+import ClientService from '../services/client.service';
+import AuthService from '../services/auth.service';
+import '../styles/AppointmentsPage.css';
 
 const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
+  const [clients, setClients] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editAppointment, setEditAppointment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Form fields
   const [clientId, setClientId] = useState('');
@@ -18,17 +24,47 @@ const AppointmentsPage = () => {
 
   // Validation error
   const [errorMessage, setErrorMessage] = useState('');
+  const [saving, setSaving] = useState(false);
 
   // References for focus-trapping
   const modalRef = useRef(null);
   const firstFieldRef = useRef(null);
 
-  // Fetch all appointments
+  // Fetch all appointments and clients
   useEffect(() => {
-    fetch('/api/appointments')
-      .then(res => res.json())
-      .then(data => setAppointments(data))
-      .catch(err => console.error('Error fetching appointments:', err));
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Get current user
+        const currentUser = AuthService.getCurrentUser();
+        
+        // Fetch appointments for the current practitioner
+        const appointmentsData = currentUser?.id ? 
+          await AppointmentService.getPractitionerAppointments(currentUser.id) :
+          await AppointmentService.getAllAppointments();
+        
+        // Fetch all clients for the dropdown
+        const clientsData = await ClientService.getAllClients();
+        
+        setAppointments(appointmentsData);
+        setClients(clientsData);
+        
+        // Set practitioner ID from current user if available
+        if (currentUser?.id) {
+          setPractitionerId(currentUser.id);
+        }
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Open form in "create" or "edit" mode
@@ -39,8 +75,8 @@ const AppointmentsPage = () => {
       setEditAppointment(appt);
       setClientId(appt.clientId);
       setPractitionerId(appt.practitionerId);
-      setStartTime(appt.startTime);
-      setEndTime(appt.endTime || '');
+      setStartTime(formatDateTimeForInput(new Date(appt.startTime)));
+      setEndTime(appt.endTime ? formatDateTimeForInput(new Date(appt.endTime)) : '');
       setStatus(appt.status);
       setTitle(appt.title);
       setNotes(appt.notes);
@@ -48,7 +84,7 @@ const AppointmentsPage = () => {
       // New appointment
       setEditAppointment(null);
       setClientId('');
-      setPractitionerId('');
+      // Keep practitionerId set to current user if available
       setStartTime('');
       setEndTime('');
       setStatus('scheduled');
@@ -58,13 +94,18 @@ const AppointmentsPage = () => {
     setShowForm(true);
   };
 
+  // Helper to format date for datetime-local input
+  const formatDateTimeForInput = (date) => {
+    return date.toISOString().slice(0, 16);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
     // Basic validation
     if (!clientId || !practitionerId || !startTime) {
-      setErrorMessage('Please fill in required fields: Client ID, Practitioner ID, Start Time.');
+      setErrorMessage('Please fill in required fields: Client, Start Time.');
       return;
     }
     if (endTime && new Date(endTime) <= new Date(startTime)) {
@@ -72,50 +113,52 @@ const AppointmentsPage = () => {
       return;
     }
 
-    const payload = { clientId, practitionerId, startTime, endTime, status, title, notes };
+    const payload = { 
+      clientId, 
+      practitionerId, 
+      startTime: new Date(startTime).toISOString(), 
+      endTime: endTime ? new Date(endTime).toISOString() : null, 
+      status, 
+      title, 
+      notes 
+    };
 
     try {
-      let url = '/api/appointments';
-      let method = 'POST';
+      setSaving(true);
+      let result;
+      
       if (editAppointment) {
-        url += `/${editAppointment.id}`;
-        method = 'PUT';
-      }
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (editAppointment) {
-          setAppointments(prev => prev.map(a => (a.id === data.id ? data : a)));
-        } else {
-          setAppointments(prev => [...prev, data]);
-        }
-        setShowForm(false);
+        result = await AppointmentService.updateAppointment(editAppointment.id, payload);
+        setAppointments(prev => prev.map(a => (a.id === result.id ? result : a)));
       } else {
-        console.error('Error:', data.message || 'Something went wrong.');
+        result = await AppointmentService.createAppointment(payload);
+        setAppointments(prev => [...prev, result]);
       }
+      
+      setShowForm(false);
     } catch (error) {
       console.error('Error saving appointment:', error);
+      setErrorMessage('Failed to save appointment. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this appointment?')) return;
     try {
-      const res = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (res.ok) {
-        setAppointments(prev => prev.filter(a => a.id !== id));
-      } else {
-        console.error(data.message || 'Failed to delete.');
-      }
+      await AppointmentService.deleteAppointment(id);
+      setAppointments(prev => prev.filter(a => a.id !== id));
     } catch (error) {
       console.error('Delete error:', error);
+      alert('Failed to delete appointment. Please try again.');
     }
+  };
+
+  // Get client name by ID
+  const getClientName = (clientId) => {
+    const client = clients.find(c => c.id === clientId);
+    return client ? client.name : 'Unknown Client';
   };
 
   // Color-coded status label
@@ -155,6 +198,24 @@ const AppointmentsPage = () => {
     }
   };
 
+  if (loading) {
+    return <div className="loading">Loading appointments...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error">{error}</div>
+        <button 
+          className="btn secondary" 
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="appointments-page">
       <h2 className="section-title">Appointments</h2>
@@ -162,142 +223,149 @@ const AppointmentsPage = () => {
         + New Appointment
       </button>
 
-      <table className="appt-table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Client</th>
-            <th>Practitioner</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {appointments.map(appt => (
-            <tr key={appt.id}>
-              <td>{appt.title}</td>
-              <td>{appt.clientId}</td>
-              <td>{appt.practitionerId}</td>
-              <td>{new Date(appt.startTime).toLocaleString()}</td>
-              <td>{appt.endTime ? new Date(appt.endTime).toLocaleString() : 'N/A'}</td>
-              <td>
-                <span className={`appt-status ${statusClass(appt.status)}`}>
-                  {appt.status}
-                </span>
-              </td>
-              <td>
-                <button className="btn edit-btn" onClick={() => openForm(appt)}>Edit</button>
-                <button className="btn delete-btn" onClick={() => handleDelete(appt.id)}>Delete</button>
-              </td>
+      {appointments.length === 0 ? (
+        <p>No appointments found. Create one to get started.</p>
+      ) : (
+        <table className="appt-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Client</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {appointments.map(appt => (
+              <tr key={appt.id}>
+                <td>{appt.title}</td>
+                <td>{getClientName(appt.clientId)}</td>
+                <td>{new Date(appt.startTime).toLocaleDateString()}</td>
+                <td>
+                  {new Date(appt.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  {appt.endTime && ` - ${new Date(appt.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                </td>
+                <td>
+                  <span className={`appt-status ${statusClass(appt.status)}`}>
+                    {appt.status}
+                  </span>
+                </td>
+                <td>
+                  <button className="btn edit-btn" onClick={() => openForm(appt)}>Edit</button>
+                  <button className="btn delete-btn" onClick={() => handleDelete(appt.id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       {/* Modal */}
       {showForm && (
-        <div className="custom-backdrop">
-          <div className="custom-content" ref={modalRef} onKeyDown={handleKeyDown}>
-            <button
-              className="close-icon"
-              onClick={() => setShowForm(false)}
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-
+        <div className="modal-overlay">
+          <div className="modal" ref={modalRef} onKeyDown={handleKeyDown}>
             <h3>{editAppointment ? 'Edit Appointment' : 'New Appointment'}</h3>
-
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
-
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Title</label>
-                <input
-                  type="text"
-                  placeholder="Session Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  ref={firstFieldRef}
-                  required
-                />
-              </div>
+              {errorMessage && <div className="error-message">{errorMessage}</div>}
 
               <div className="form-group">
-                <label>Client ID</label>
-                <input
-                  type="text"
-                  placeholder="Client identifier"
+                <label htmlFor="client">Client:</label>
+                <select
+                  id="client"
                   value={clientId}
                   onChange={(e) => setClientId(e.target.value)}
+                  ref={firstFieldRef}
+                  disabled={saving}
                   required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Practitioner ID</label>
-                <input
-                  type="text"
-                  placeholder="Practitioner identifier"
-                  value={practitionerId}
-                  onChange={(e) => setPractitionerId(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Start Time</label>
-                  <input
-                    type="datetime-local"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>End Time</label>
-                  <input
-                    type="datetime-local"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Status</label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="completed">Completed</option>
-                  <option value="no-show">No-Show</option>
+                  <option value="">Select Client</option>
+                  {clients.map(client => (
+                    <option key={client.id} value={client.id}>
+                      {client.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Notes</label>
-                <textarea
-                  placeholder="Any additional notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                <label htmlFor="startTime">Start Time:</label>
+                <input
+                  id="startTime"
+                  type="datetime-local"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  disabled={saving}
+                  required
                 />
               </div>
 
-              <div className="modal-actions">
-                <button type="submit" className="btn primary">
-                  {editAppointment ? 'Update' : 'Create'}
-                </button>
+              <div className="form-group">
+                <label htmlFor="endTime">End Time:</label>
+                <input
+                  id="endTime"
+                  type="datetime-local"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  disabled={saving}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="title">Title:</label>
+                <input
+                  id="title"
+                  type="text"
+                  placeholder="e.g., Initial Consultation, Weekly Therapy"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  disabled={saving}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="notes">Notes:</label>
+                <textarea
+                  id="notes"
+                  placeholder="Any additional details"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  disabled={saving}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="status">Status:</label>
+                <select
+                  id="status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  disabled={saving}
+                >
+                  <option value="scheduled">Scheduled</option>
+                  <option value="completed">Completed</option>
+                  <option value="no-show">No Show</option>
+                  <option value="canceled">Canceled</option>
+                </select>
+              </div>
+
+              <div className="form-buttons">
                 <button
                   type="button"
                   className="btn secondary"
                   onClick={() => setShowForm(false)}
+                  disabled={saving}
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn primary"
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : (editAppointment ? 'Update Appointment' : 'Create Appointment')}
                 </button>
               </div>
             </form>

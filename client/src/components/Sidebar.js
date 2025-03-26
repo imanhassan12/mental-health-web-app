@@ -1,28 +1,46 @@
 // client/src/components/Sidebar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { FaHome, FaUsers, FaClipboardList, FaBook, FaCalendarAlt } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 
 const Sidebar = () => {
+  // Function to determine if a link is active
+  const getActiveLinkClass = ({ isActive }) => 
+    isActive ? "sidebar__link sidebar__link--active" : "sidebar__link";
+
   return (
     <aside className="sidebar">
       <nav className="sidebar__nav">
-        {/* Dashboard remains the same */}
-        <Link to="/" className="sidebar__link">Dashboard</Link>
+        {/* Dashboard with icon */}
+        <NavLink to="/" className={getActiveLinkClass} end>
+          <FaHome className="sidebar__icon" />
+          <span>Dashboard</span>
+        </NavLink>
         
-        {/* Clients remains the same */}
-        <Link to="/clients" className="sidebar__link">Clients</Link>
+        {/* Clients with icon */}
+        <NavLink to="/clients" className={getActiveLinkClass}>
+          <FaUsers className="sidebar__icon" />
+          <span>Clients</span>
+        </NavLink>
         
-        {/* Rename “Daily Check-Ins” => “Session Notes,” path => /notes */}
-        <Link to="/notes" className="sidebar__link">Session Notes</Link>
+        {/* Session Notes with icon */}
+        <NavLink to="/notes" className={getActiveLinkClass}>
+          <FaClipboardList className="sidebar__icon" />
+          <span>Session Notes</span>
+        </NavLink>
         
-        {/* Rename “Skills” => “Resources,” path => /resources */}
-        <Link to="/resources" className="sidebar__link">Resources</Link>
+        {/* Resources with icon */}
+        <NavLink to="/resources" className={getActiveLinkClass}>
+          <FaBook className="sidebar__icon" />
+          <span>Resources</span>
+        </NavLink>
         
-        
-        
-        {/* Appointments stays the same */}
-        <Link to="/appointments" className="sidebar__link">Appointments</Link>
+        {/* Appointments with icon */}
+        <NavLink to="/appointments" className={getActiveLinkClass}>
+          <FaCalendarAlt className="sidebar__icon" />
+          <span>Appointments</span>
+        </NavLink>
       </nav>
     </aside>
   );

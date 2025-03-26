@@ -1,6 +1,8 @@
 // client/src/pages/ClientForm.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import ClientService from '../services/client.service';
+import '../styles/ClientForm.css';
 
 const ClientForm = ({ isEdit }) => {
   const { clientId } = useParams(); // if editing a specific client
@@ -9,41 +11,74 @@ const ClientForm = ({ isEdit }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (isEdit && clientId) {
-      // Fetch existing client data
-      fetch(`/api/clients/${clientId}`)
-        .then(res => res.json())
-        .then(client => {
+    const fetchClientData = async () => {
+      if (isEdit && clientId) {
+        try {
+          setLoading(true);
+          const client = await ClientService.getClientById(clientId);
           setName(client.name);
-          setPhone(client.phone);
-          setNotes(client.notes);
-        })
-        .catch(err => console.error('Error fetching client:', err));
-    }
+          setPhone(client.phone || '');
+          setNotes(client.notes || '');
+          setError(null);
+        } catch (err) {
+          console.error('Error fetching client:', err);
+          setError('Failed to load client data. Please try again later.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchClientData();
   }, [isEdit, clientId]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = { name, phone, notes };
 
-    const method = isEdit ? 'PUT' : 'POST';
-    const url = isEdit ? `/api/clients/${clientId}` : '/api/clients';
-
-    fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log('Client saved:', data);
-        // redirect back to clients list
-        navigate('/clients');
-      })
-      .catch(err => console.error('Error saving client:', err));
+    try {
+      setLoading(true);
+      
+      if (isEdit) {
+        await ClientService.updateClient(clientId, payload);
+      } else {
+        await ClientService.createClient(payload);
+      }
+      
+      // Redirect back to clients list
+      navigate('/clients');
+    } catch (err) {
+      console.error('Error saving client:', err);
+      setError('Failed to save client. Please try again.');
+      setLoading(false);
+    }
   };
+
+  const handleCancel = () => {
+    navigate('/clients');
+  };
+
+  if (loading && isEdit) {
+    return <div className="loading">Loading client data...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error">{error}</div>
+        <button 
+          className="btn secondary" 
+          onClick={() => navigate('/clients')}
+        >
+          Go Back to Clients
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="client-form-page">
@@ -51,33 +86,54 @@ const ClientForm = ({ isEdit }) => {
 
       <form onSubmit={handleSubmit} className="client-form">
         <div className="form-group">
-          <label>Client Name</label>
+          <label htmlFor="name">Client Name</label>
           <input
+            id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
         <div className="form-group">
-          <label>Phone</label>
+          <label htmlFor="phone">Phone</label>
           <input
+            id="phone"
             type="text"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            disabled={loading}
           />
         </div>
         <div className="form-group">
-          <label>Notes</label>
+          <label htmlFor="notes">Notes</label>
           <textarea
-            rows={3}
+            id="notes"
+            rows={5}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
+            disabled={loading}
+            placeholder="Add any relevant information about the client here"
           />
         </div>
-        <button type="submit" className="btn primary">
-          {isEdit ? 'Update Client' : 'Create Client'}
-        </button>
+        <div className="form-buttons">
+          <button 
+            type="button" 
+            className="btn secondary"
+            onClick={handleCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            className="btn primary"
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : (isEdit ? 'Update Client' : 'Create Client')}
+          </button>
+        </div>
       </form>
     </div>
   );

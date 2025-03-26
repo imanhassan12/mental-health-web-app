@@ -1,19 +1,19 @@
-# Mental Health Practioner Aide
+# Mental Health Practitioner Aide
 
 ## Overview
 
-**Mental Health Practitoner Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins,treatment goal tracking, note logging,and actionable insights.** By replacing outdated paper-based systems with a modern. integrated digital solutin, out app empowers practitioners to make data-driven decisions and enhance treatment outcomese. 
+**Mental Health Practitoner Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins, treatment goal tracking, note logging, and actionable insights.** By replacing outdated paper-based systems with a modern, integrated digital solution, our app empowers practitioners to make data-driven decisions and enhance treatment outcomes. 
 
 ---
 
 ## Vision & Scope
 
 ### **Vision**
-Empower mental health practitioners with a secure, integrated, and user-friendly platdorm for comprehensive client management, enabling better tracking of client progress and improved treatment outcomes.
+Empower mental health practitioners with a secure, integrated, and user-friendly platform for comprehensive client management, enabling better tracking of client progress and improved treatment outcomes.
 
 ### **Scope**
 #### ✅ **Core Features:**
-- **Secure Practitoner Login:** Rle-based authentication ensures that only authorized practitoners can access client data.
+- **Secure Practitoner Login:** Role-based authentication ensures that only authorized practitioners can access client data.
 - **Client Management Dashboard:** View and manage detailed client profiles, including mood, check-ins, session notes, and treatment goals.
 - **Daily Check-ins:** Record client mood and session observations to track progress over time.
 - **Goal Setting & Monitoring:** Establish and monitor treatment goals to support client improvement.
@@ -27,12 +27,12 @@ Empower mental health practitioners with a secure, integrated, and user-friendly
 
 ## Features
 
-- **Secure Practitoner Login :** Role-based authentication to ensure private data remains protected. 
-- **Client Management Dashboard**  Unified interface for viewing/editing client profiles, mood-checkins, and goals.
-- **Goal Setting and Monitoring** Create measureable treatment goals, track progress over time.
-- **Session Notes** Easily capture session summaries, structured notes, and attach them to a client's profile. 
-- **Appointment & Scheduling** - Schedule and manage client appointments with status updates
-- **Resources** - Skills Library that include DBT/CBT exercises for clients. 
+- **Secure Practitoner Login:** Role-based authentication to ensure private data remains protected. 
+- **Client Management Dashboard:** Unified interface for viewing/editing client profiles, mood-checkins, and goals.
+- **Goal Setting and Monitoring:** Create measureable treatment goals, track progress over time.
+- **Session Notes:** Easily capture session summaries, structured notes, and attach them to a client's profile. 
+- **Appointment & Scheduling:** Schedule and manage client appointments with status updates
+- **Resources:** Skills Library that include DBT/CBT exercises for clients. 
 
 ---
 
@@ -45,51 +45,112 @@ Empower mental health practitioners with a secure, integrated, and user-friendly
 
 ### **Backend**
 - Node.js with Express for lightweight, scalable API endpoints
-- Integratin with AWS services for hosting and data management
+- Sequelize ORM for database operations
+- MySQL for relational database storage
 
 ### **Database**
-- PostgreSQL for reliability and flexibility. It handles complex client data, supports advanced queries, and scales as our needs grow.
+- MySQL for reliability and flexibility. It handles complex client data, supports advanced queries, and scales as our needs grow.
 
 ### **Version Control**
 - 🔄 Git & GitHub for collaboration and code management
 
 ---
-## Installation
+## Getting Started
 
-### 1️⃣ Clone the Repository
+### Prerequisites
+- Node.js (v14 or newer)
+- Docker and Docker Compose (for MySQL database)
+- npm or yarn
+
+### Setup Database with Docker
+
+1. Start the MySQL database using Docker:
 ```bash
-git clone https://github.com/imanhassan12/mental-health-web-app.git
+docker-compose up -d
 ```
 
-### 2️⃣ Install Dependencies
+This will start MySQL on port 3306 and phpMyAdmin on port 8080. You can access phpMyAdmin at http://localhost:8080 (username: user, password: password).
 
-#### Client (Frontend)
+### Install and Set Up Backend
+
+1. Navigate to the server directory:
 ```bash
-cd mental-health-web-app/client
+cd server
+```
+
+2. Install dependencies:
+```bash
 npm install
 ```
 
-#### Server (Backend)
+3. Create a `.env` file in the server directory with the following content:
+```
+DB_USERNAME=user
+DB_PASSWORD=password
+DB_DATABASE=mental_health_db
+DB_HOST=localhost
+DB_DIALECT=mysql
+JWT_SECRET=YourSuperSecretKeyForJWT
+```
+
+4. Initialize the database - you have two options:
+
+   **Option 1:** Standard setup with basic seed data:
+   ```bash
+   npm run db:init
+   ```
+
+   **Option 2:** Enhanced setup with comprehensive SQL demo data:
+   ```bash
+   npm run db:demo-setup
+   ```
+   *This loads more extensive sample data including multiple practitioners, clients, appointments, notes, and goals.*
+
+5. Start the development server:
 ```bash
-cd ../server
+npm run dev
+```
+
+The backend server will be running at http://localhost:4000.
+
+### Default Login Credentials
+
+After seeding the database, you can log in with:
+
+For basic seed data:
+- Username: `jsmith`, Password: `password123`
+
+For enhanced SQL demo data:
+- Username: `jsmith`, Password: `password123`
+- Username: `mjohnson`, Password: `password123`
+
+### Install and Set Up Frontend
+
+1. Open a new terminal and navigate to the client directory:
+```bash
+cd client
+```
+
+2. Install dependencies:
+```bash
 npm install
 ```
+
+3. Start the development server:
+```bash
+npm start
+```
+
+The frontend will be running at http://localhost:3000.
+
+### Default Login
+
+After seeding the database, you can log in with:
+- Username: `jsmith`
+- Password: `password123`
+
+---
 
 ## Usage
 
-### Start the Backend
-
-Navigate to the server directory and run:
-```bash
-cd server
-npm install  # Ensure dependencies are installed
-npx nodemon server.js
-```
-
-### Start the Frontend
-
-In a separate terminal, navigate to the client directory and run:
-```bash
-cd client
-npm start
-```
+See the individual README files in the client and server directories for more details about usage and API endpoints.
