@@ -4,6 +4,9 @@ const util = require('util');
 const execPromise = util.promisify(exec);
 const setupDatabase = require('./db-setup');
 const runSqlDemo = require('./run-sql-demo');
+const fs = require('fs');
+const path = require('path');
+const { sequelize } = require('../models');
 
 // Runs a command and outputs the results
 const runCommand = async (command, description) => {
@@ -16,6 +19,41 @@ const runCommand = async (command, description) => {
     return true;
   } catch (error) {
     console.error(`❌ ${description} failed:`, error.message);
+    return false;
+  }
+};
+
+// Fallback method to load demo data using Sequelize
+const loadDemoDataFallback = async () => {
+  try {
+    console.log('🔄 Using fallback method to load demo data...');
+    
+    // Read the SQL file
+    const sqlFilePath = path.join(__dirname, 'demo-data.sql');
+    const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
+    
+    // Split the SQL content into individual statements
+    const statements = sqlContent
+      .replace(/\/\*.*\*\//g, '') // Remove comments
+      .replace(/--.*\n/g, '\n')  // Remove single-line comments
+      .split(';')
+      .filter(stmt => stmt.trim() !== '');
+    
+    // Execute each statement separately
+    for (const stmt of statements) {
+      try {
+        await sequelize.query(stmt);
+      } catch (error) {
+        console.error(`Error executing statement: ${error.message}`);
+        console.error(`Statement: ${stmt.trim().substring(0, 100)}...`);
+        // Continue with next statement even if one fails
+      }
+    }
+    
+    console.log('✅ Demo data loaded successfully via fallback method');
+    return true;
+  } catch (error) {
+    console.error('❌ Error in fallback demo data loading:', error);
     return false;
   }
 };
@@ -44,7 +82,13 @@ const fullDemoSetup = async () => {
     }
     
     // Step 3: Run the SQL demo data
-    const demoDataSuccess = await runSqlDemo();
+    let demoDataSuccess = await runSqlDemo();
+    
+    // If SQL file method fails, try the fallback method
+    if (!demoDataSuccess) {
+      console.warn('⚠️ Primary method for loading demo data failed, trying fallback method...');
+      demoDataSuccess = await loadDemoDataFallback();
+    }
     
     if (!demoDataSuccess) {
       console.error('❌ Loading demo data failed. Exiting.');

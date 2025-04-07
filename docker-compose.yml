@@ -15,7 +15,7 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - mental-health-network
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --skip-ssl --disable-ssl
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
       interval: 10s
@@ -44,7 +44,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     container_name: mental_health_backend
-    restart: always
+    restart: on-failure:3  # Limit restart attempts to prevent infinite restart loops
     depends_on:
       mysql:
         condition: service_healthy
@@ -54,8 +54,8 @@ services:
       - DB_USERNAME=${DB_USERNAME:-user}
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - DB_NAME=${DB_NAME:-mental_health_db}
-      - DB_HOST=${DB_HOST:-mysql}
-      - DB_DIALECT=${DB_DIALECT:-mysql}
+      - DB_HOST=mysql
+      - DB_DIALECT=mysql
       - JWT_SECRET=${JWT_SECRET:-YourSuperSecretKeyForJWT}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
     ports:
@@ -65,8 +65,20 @@ services:
       - /app/node_modules
     command: >
       sh -c "
+        echo 'Installing dependencies...' &&
         npm install &&
+        echo 'Waiting for MySQL to be ready...' &&
+        sleep 15 &&
+        echo 'Checking MySQL connection...' &&
+        echo 'DB_HOST: $DB_HOST' &&
+        echo 'DB_USERNAME: $DB_USERNAME' &&
+        echo 'DB_NAME: $DB_NAME' &&
+        echo 'Checking for MariaDB client...' &&
+        which mariadb || echo 'MariaDB client not found' &&
+        mariadb --version || echo 'MariaDB client version failed' &&
+        echo 'Running database setup...' &&
         npm run db:demo-setup &&
+        echo 'Starting server...' &&
         npm run dev
       "
     networks:

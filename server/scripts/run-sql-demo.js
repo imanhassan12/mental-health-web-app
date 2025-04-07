@@ -9,10 +9,10 @@ require('dotenv').config();
 
 // Get database configuration from environment variables
 const {
-  DB_USERNAME = 'root',
-  DB_PASSWORD = '',
-  DB_DATABASE = 'mental_health_db',
-  DB_HOST = '127.0.0.1',
+  DB_USERNAME = 'user',
+  DB_PASSWORD = 'password',
+  DB_NAME = 'mental_health_db',
+  DB_HOST = 'mysql',
 } = process.env;
 
 // Path to SQL file
@@ -22,6 +22,7 @@ const sqlFilePath = path.join(__dirname, 'demo-data.sql');
 async function runSqlFile() {
   try {
     console.log('🚀 Running SQL demo data file...');
+    console.log(`🔌 Database: ${DB_NAME} on ${DB_HOST} with user ${DB_USERNAME}`);
     
     // Read the SQL file
     const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
@@ -33,18 +34,22 @@ async function runSqlFile() {
     fs.writeFileSync(tempSqlFile, sqlContent);
     console.log(`📄 Temp SQL file created at: ${tempSqlFile}`);
     
-    // Build the mysql command with password handling and proper escaping for paths
+    // Build the mariadb command with password handling and proper escaping for paths
+    // Using mariadb instead of mysql client in Alpine Linux
     let command;
     if (DB_PASSWORD) {
       // Using MYSQL_PWD environment variable to avoid password in command line
-      command = `MYSQL_PWD="${DB_PASSWORD}" mysql -h "${DB_HOST}" -u "${DB_USERNAME}" "${DB_DATABASE}" < "${tempSqlFile}"`;
+      command = `MYSQL_PWD="${DB_PASSWORD}" mariadb -h "${DB_HOST}" -u "${DB_USERNAME}" "${DB_NAME}" < "${tempSqlFile}"`;
     } else {
-      command = `mysql -h "${DB_HOST}" -u "${DB_USERNAME}" "${DB_DATABASE}" < "${tempSqlFile}"`;
+      command = `mariadb -h "${DB_HOST}" -u "${DB_USERNAME}" "${DB_NAME}" < "${tempSqlFile}"`;
     }
     
     // Execute the SQL file
     console.log('⚙️ Executing SQL file...');
-    const { stdout, stderr } = await execPromise(command, { shell: '/bin/bash' });
+    console.log('Command:', command.replace(DB_PASSWORD, '******')); // Log command with password redacted
+    
+    // Use /bin/sh instead of /bin/bash (Alpine Linux)
+    const { stdout, stderr } = await execPromise(command, { shell: '/bin/sh' });
     
     // Clean up the temporary file
     fs.unlinkSync(tempSqlFile);
