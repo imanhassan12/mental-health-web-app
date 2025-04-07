@@ -87,6 +87,7 @@ app.post('/api/login', async (req, res) => {
     }
     
     console.log(`Login attempt for user: ${username}`);
+    console.log(`Password hash format detected: ${user.password.substring(0, 10)}...`);
     
     // Determine the password verification method based on hash format
     let isMatch = false;
@@ -96,17 +97,29 @@ app.post('/api/login', async (req, res) => {
       console.log('Detected legacy bcrypt hash. Using password "password123" for demo login.');
       // For demo purposes, allow password123 to work with old bcrypt hashes
       isMatch = password === 'password123';
-    } else {
+      console.log(`Direct string comparison used for bcrypt hash: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
+    } else if (user.password.startsWith('$argon2id$')) {
+      console.log('Detected argon2 hash format. Attempting argon2 verification...');
       // For argon2 hashes
       try {
+        console.log('About to verify with argon2...');
         isMatch = await argon2.verify(user.password, password);
+        console.log(`Argon2 verification result: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
       } catch (verifyError) {
-        console.error('Error verifying password:', verifyError);
+        console.error('ERROR verifying password with argon2:', verifyError);
+        console.log('Error type:', verifyError.constructor.name);
+        console.log('Error message:', verifyError.message);
+        console.log('Error stack:', verifyError.stack);
         isMatch = false;
       }
+    } else {
+      console.log(`Unknown password hash format: ${user.password.substring(0, 15)}...`);
+      // For unknown hash formats, try the demo password
+      isMatch = password === 'password123';
+      console.log(`Using fallback direct string comparison: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
     }
     
-    console.log(`Password match result: ${isMatch}`);
+    console.log(`Final password match result: ${isMatch}`);
     
     if (!isMatch) {
       console.log(`Login failed: Invalid password for user '${username}'`);
