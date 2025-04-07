@@ -1,0 +1,28 @@
+{
+  "name": "mental-health-web-app",
+  "version": "1.0.0",
+  "description": "Mental Health Practitioner Aide Web Application",
+  "scripts": {
+    "start": "docker-compose up",
+    "start:detached": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "build": "docker-compose build",
+    "dev:client": "cd client && npm start",
+    "dev:server": "cd server && npm run dev",
+    "install:client": "cd client && npm install",
+    "install:server": "cd server && npm install",
+    "install:all": "npm install && npm run install:client && npm run install:server",
+    "db:setup": "cd server && npm run db:demo-setup",
+    "clean": "docker-compose down -v"
+  },
+  "private": true,
+  "keywords": [
+    "mental-health",
+    "web-app",
+    "docker",
+    "react",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC"
+} 

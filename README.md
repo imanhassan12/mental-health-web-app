@@ -1,77 +1,161 @@
 # Mental Health Practitioner Aide
 
-## Overview
-
-**Mental Health Practitoner Aide** is an innovative web application designed specifically for mental health practitioners. Our tool streamlines client management by enabling secure, centralized access to client data, **daily mood check-ins, treatment goal tracking, note logging, and actionable insights.** By replacing outdated paper-based systems with a modern, integrated digital solution, our app empowers practitioners to make data-driven decisions and enhance treatment outcomes. 
-
----
-
-## Vision & Scope
-
-### **Vision**
-Empower mental health practitioners with a secure, integrated, and user-friendly platform for comprehensive client management, enabling better tracking of client progress and improved treatment outcomes.
-
-### **Scope**
-#### ✅ **Core Features:**
-- **Secure Practitoner Login:** Role-based authentication ensures that only authorized practitioners can access client data.
-- **Client Management Dashboard:** View and manage detailed client profiles, including mood, check-ins, session notes, and treatment goals.
-- **Daily Check-ins:** Record client mood and session observations to track progress over time.
-- **Goal Setting & Monitoring:** Establish and monitor treatment goals to support client improvement.
-- **Integrated Analytics:** Visualize client data trends to gain actionable insights.
-- **Secure Communication:** Send reminders and real-time notifications to ensure proactive engagement.
-#### 🔮 **Planned Features:**
-- **Skills Library:** Guided DBT/CBT exercises.
-- **Progress Tracking:** Visualize mood trends over time.
-
----
+A web application for mental health practitioners to manage clients, appointments, session notes, and goals.
 
 ## Features
 
-- **Secure Practitoner Login:** Role-based authentication to ensure private data remains protected. 
-- **Client Management Dashboard:** Unified interface for viewing/editing client profiles, mood-checkins, and goals.
-- **Goal Setting and Monitoring:** Create measureable treatment goals, track progress over time.
-- **Session Notes:** Easily capture session summaries, structured notes, and attach them to a client's profile. 
-- **Appointment & Scheduling:** Schedule and manage client appointments with status updates
-- **Resources:** Skills Library that include DBT/CBT exercises for clients. 
-
----
+- Client management
+- Appointment scheduling
+- Session notes recording
+- Goal tracking
+- Dashboard with key metrics
 
 ## Tech Stack
 
-### **Frontend**
-- React (with Create React App)
-- Bootstrap for responsive, modern design
-- Custom CSS & React Icons for a polished look
+- **Frontend**: React, React Router, Axios, Chart.js
+- **Backend**: Node.js, Express, Sequelize ORM
+- **Database**: MySQL
+- **Docker**: Containerization for easy deployment
 
-### **Backend**
-- Node.js with Express for lightweight, scalable API endpoints
-- Sequelize ORM for database operations
-- MySQL for relational database storage
+## Prerequisites
 
-### **Database**
-- MySQL for reliability and flexibility. It handles complex client data, supports advanced queries, and scales as our needs grow.
+- Docker
+- Docker Compose
 
-### **Version Control**
-- 🔄 Git & GitHub for collaboration and code management
+### Installing Docker & Docker Compose
 
----
-## Getting Started
+#### Docker
+- **Mac**: [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+- **Windows**: [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+- **Linux**: [Docker Engine](https://docs.docker.com/engine/install/)
 
-### Prerequisites
-- Node.js (v14 or newer)
-- Docker and Docker Compose (for MySQL database)
-- npm or yarn
+#### Docker Compose
+- **Mac/Windows**: Docker Compose is included with Docker Desktop
+- **Linux**: Follow the [official installation guide](https://docs.docker.com/compose/install/linux/)
+  ```bash
+  # Download the current stable release of Docker Compose
+  sudo curl -SL https://github.com/docker/compose/releases/download/v2.34.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+  
+  # Apply executable permissions
+  sudo chmod +x /usr/local/bin/docker-compose
+  
+  # Verify installation
+  docker-compose --version
+  ```
 
-### Setup Database with Docker
+## Quick Start with Docker
 
-1. Start the MySQL database using Docker:
+The easiest way to run the application is using Docker Compose, which will start all components (database, backend, and frontend) with a single command.
+
+1. Clone the repository:
 ```bash
-docker-compose up -d
+git clone <repository-url>
+cd mental-health-web-app
 ```
 
-This will start MySQL on port 3306 and phpMyAdmin on port 8080. You can access phpMyAdmin at http://localhost:8080 (username: user, password: password).
+2. Run the setup script (which creates the `.env` file and starts the application):
+```bash
+./setup.sh
+```
 
-### Install and Set Up Backend
+**OR** follow these manual steps:
+
+1. Create a `.env` file in the root directory:
+```
+DB_USERNAME=user
+DB_PASSWORD=password
+JWT_SECRET=YourSuperSecretKeyForJWT
+```
+
+2. Start the application:
+```bash
+npm run start
+```
+
+This will:
+- Start a MySQL database on port 3306
+- Start phpMyAdmin on port 8080 (access at http://localhost:8080)
+- Start the backend server on port 4000
+- Start the frontend on port 3000 (access the application at http://localhost:3000)
+- Set up the database with demo data
+
+3. To stop the application:
+```bash
+npm run stop
+```
+
+4. To remove all data and start fresh:
+```bash
+npm run clean
+```
+
+## Using phpMyAdmin
+
+The application includes phpMyAdmin for database management, accessible at http://localhost:8080 once the containers are running.
+
+### Login Credentials
+
+When accessing phpMyAdmin, use the following details:
+
+- **Server**: `mysql` (not localhost, as phpMyAdmin connects via Docker's internal network)
+- **Username**: `user` (default regular user) or `root` (administrator)
+- **Password**: `password` (for regular user) or `rootpassword` (for root user)
+
+### Troubleshooting phpMyAdmin Access
+
+If you encounter connection issues with phpMyAdmin:
+
+1. Ensure the MySQL container is running:
+   ```bash
+   docker ps | grep mysql
+   ```
+
+2. Check if MySQL is properly initialized:
+   ```bash
+   docker logs mental_health_db
+   ```
+
+3. Make sure you're using the service name `mysql` as the server, not `localhost`
+
+4. If you modified the default credentials in your `.env` file, use those values instead
+
+5. Try restarting the containers:
+   ```bash
+   docker-compose restart
+   ```
+
+## Login Credentials
+
+After starting the application with demo data, you can log in with:
+- Username: `jsmith`
+- Password: `password123`
+
+Or:
+- Username: `mjohnson`
+- Password: `password123`
+
+## Troubleshooting
+
+### Common Issues
+
+- **Docker Compose Not Found**: Make sure Docker Compose is installed. On Linux, you need to install it separately; on Mac/Windows, it comes with Docker Desktop.
+- **Docker Not Running**: Make sure Docker is running before starting the application.
+- **Port Conflicts**: If you already have services running on ports 3000, 4000, 3306, or 8080, you'll need to stop them or modify the port mappings in docker-compose.yml.
+
+## Manual Setup (Without Docker)
+
+If you prefer to run the components separately, follow these steps:
+
+### Setup Database (MySQL)
+
+1. Install MySQL locally or use Docker:
+```bash
+docker-compose up -d mysql
+```
+
+2. Access phpMyAdmin at http://localhost:8080 (username: user, password: password).
+
+### Setup Backend
 
 1. Navigate to the server directory:
 ```bash
@@ -83,48 +167,21 @@ cd server
 npm install
 ```
 
-3. Create a `.env` file in the server directory with the following content:
-```
-DB_USERNAME=user
-DB_PASSWORD=password
-DB_DATABASE=mental_health_db
-DB_HOST=localhost
-DB_DIALECT=mysql
-JWT_SECRET=YourSuperSecretKeyForJWT
+3. Create a `.env` file with your database credentials.
+
+4. Initialize the database:
+```bash
+npm run db:demo-setup
 ```
 
-4. Initialize the database - you have two options:
-
-   **Option 1:** Standard setup with basic seed data:
-   ```bash
-   npm run db:init
-   ```
-
-   **Option 2:** Enhanced setup with comprehensive SQL demo data:
-   ```bash
-   npm run db:demo-setup
-   ```
-   *This loads more extensive sample data including multiple practitioners, clients, appointments, notes, and goals.*
-
-5. Start the development server:
+5. Start the server:
 ```bash
 npm run dev
 ```
 
-The backend server will be running at http://localhost:4000.
+The server will be running at http://localhost:4000.
 
-### Default Login Credentials
-
-After seeding the database, you can log in with:
-
-For basic seed data:
-- Username: `jsmith`, Password: `password123`
-
-For enhanced SQL demo data:
-- Username: `jsmith`, Password: `password123`
-- Username: `mjohnson`, Password: `password123`
-
-### Install and Set Up Frontend
+### Setup Frontend
 
 1. Open a new terminal and navigate to the client directory:
 ```bash
@@ -143,14 +200,13 @@ npm start
 
 The frontend will be running at http://localhost:3000.
 
-### Default Login
+## Development
 
-After seeding the database, you can log in with:
-- Username: `jsmith`
-- Password: `password123`
+- `npm run dev:client` - Run the frontend in development mode
+- `npm run dev:server` - Run the backend in development mode
+- `npm run install:all` - Install all dependencies (root, client, server)
+- `npm run db:setup` - Initialize the database with demo data
 
----
+## License
 
-## Usage
-
-See the individual README files in the client and server directories for more details about usage and API endpoints.
+ISC

@@ -1,15 +1,14 @@
-version: '3.8'
-
 services:
+  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: mental_health_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-}
-      MYSQL_DATABASE: mental_health_db
-      MYSQL_USER: ${DB_USERNAME:-user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mental_health_db}
+      MYSQL_USER: ${MYSQL_USER:-user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
     ports:
       - "3306:3306"
     volumes:
@@ -17,7 +16,13 @@ services:
     networks:
       - mental-health-network
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # phpMyAdmin for database management
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: mental_health_phpmyadmin
@@ -30,6 +35,60 @@ services:
     restart: always
     ports:
       - "8080:80"
+    networks:
+      - mental-health-network
+
+  # Backend server (Node.js/Express)
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mental_health_backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${PORT:-4000}
+      - DB_USERNAME=${DB_USERNAME:-user}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-mental_health_db}
+      - DB_HOST=${DB_HOST:-mysql}
+      - DB_DIALECT=${DB_DIALECT:-mysql}
+      - JWT_SECRET=${JWT_SECRET:-YourSuperSecretKeyForJWT}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: >
+      sh -c "
+        npm install &&
+        npm run db:demo-setup &&
+        npm run dev
+      "
+    networks:
+      - mental-health-network
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: mental_health_frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:4000}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm start
     networks:
       - mental-health-network
 
