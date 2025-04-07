@@ -1,12 +1,30 @@
 'use strict';
-const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
+
+// Helper function for hashing passwords with crypto
+function hashPassword(password) {
+  return new Promise((resolve, reject) => {
+    // Use a consistent salt for demo accounts to ensure reproducibility
+    const salt = 'demo_salt_for_consistency_1234567890';
+    
+    // Use PBKDF2 to hash the password with the salt
+    crypto.pbkdf2(password, salt, 10000, 64, 'sha512', (err, derivedKey) => {
+      if (err) return reject(err);
+      
+      // Format: algorithm:iterations:salt:hash
+      const hash = `pbkdf2:10000:${salt}:${derivedKey.toString('hex')}`;
+      resolve(hash);
+    });
+  });
+}
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     // Generate some UUIDs for consistent references
-    const practitionerId = uuidv4();
+    const practitionerId1 = uuidv4();
+    const practitionerId2 = uuidv4();
     const clientId1 = uuidv4();
     const clientId2 = uuidv4();
     
@@ -14,17 +32,26 @@ module.exports = {
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    // Hash a password for the demo practitioner
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    // Hash a password for the demo practitioners using PBKDF2
+    const hashedPassword = await hashPassword('password123');
     
     // Add practitioners
     await queryInterface.bulkInsert('Practitioners', [
       {
-        id: practitionerId,
+        id: practitionerId1,
         name: 'Dr. Jane Smith',
         username: 'jsmith',
         password: hashedPassword,
         email: 'jane.smith@example.com',
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: practitionerId2,
+        name: 'Dr. Michael Johnson',
+        username: 'mjohnson',
+        password: hashedPassword,
+        email: 'michael.johnson@example.com',
         createdAt: now,
         updatedAt: now
       }
@@ -63,7 +90,7 @@ module.exports = {
       {
         id: uuidv4(),
         clientId: clientId1,
-        practitionerId: practitionerId,
+        practitionerId: practitionerId1,
         startTime: tomorrow,
         endTime: new Date(tomorrow.getTime() + 3600000), // 1 hour later
         status: 'scheduled',
@@ -75,7 +102,7 @@ module.exports = {
       {
         id: uuidv4(),
         clientId: clientId2,
-        practitionerId: practitionerId,
+        practitionerId: practitionerId1,
         startTime: nextWeek,
         endTime: new Date(nextWeek.getTime() + 3600000), // 1 hour later
         status: 'scheduled',

@@ -73,11 +73,10 @@ services:
         echo 'DB_HOST: $DB_HOST' &&
         echo 'DB_USERNAME: $DB_USERNAME' &&
         echo 'DB_NAME: $DB_NAME' &&
-        echo 'Checking for MariaDB client...' &&
-        which mariadb || echo 'MariaDB client not found' &&
-        mariadb --version || echo 'MariaDB client version failed' &&
         echo 'Running database setup...' &&
         npm run db:demo-setup &&
+        echo 'Updating demo passwords...' &&
+        npm run update-passwords &&
         echo 'Starting server...' &&
         npm run dev
       "

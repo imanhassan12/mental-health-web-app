@@ -6,20 +6,19 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "db:setup": "node scripts/db-setup.js",
-    "db:init": "node scripts/init-db.js && node update-argon2-passwords.js",
+    "db:init": "node scripts/init-db.js && node update-passwords.js",
     "db:migrate": "sequelize-cli db:migrate",
     "db:seed": "sequelize-cli db:seed:all",
     "db:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all",
     "db:demo": "node scripts/run-sql-demo.js",
     "db:demo-setup": "node scripts/full-demo-setup.js",
-    "update-passwords": "node update-argon2-passwords.js"
+    "update-passwords": "node update-passwords.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "argon2": "^0.30.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.21.2",

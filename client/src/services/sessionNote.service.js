@@ -4,7 +4,7 @@ const SessionNoteService = {
   // Get all session notes
   getAllSessionNotes: async () => {
     try {
-      const response = await api.get('/sessionNotes');
+      const response = await api.get('/session-notes');
       return response.data;
     } catch (error) {
       throw error;
@@ -14,7 +14,7 @@ const SessionNoteService = {
   // Get session notes for a specific client
   getClientSessionNotes: async (clientId) => {
     try {
-      const response = await api.get(`/sessionNotes/client/${clientId}`);
+      const response = await api.get(`/session-notes/client/${clientId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -24,7 +24,7 @@ const SessionNoteService = {
   // Get a specific session note by ID
   getSessionNoteById: async (id) => {
     try {
-      const response = await api.get(`/sessionNotes/${id}`);
+      const response = await api.get(`/session-notes/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -34,7 +34,7 @@ const SessionNoteService = {
   // Create a new session note
   createSessionNote: async (sessionNoteData) => {
     try {
-      const response = await api.post('/sessionNotes', sessionNoteData);
+      const response = await api.post('/session-notes', sessionNoteData);
       return response.data;
     } catch (error) {
       throw error;
@@ -44,7 +44,7 @@ const SessionNoteService = {
   // Update an existing session note
   updateSessionNote: async (id, sessionNoteData) => {
     try {
-      const response = await api.put(`/sessionNotes/${id}`, sessionNoteData);
+      const response = await api.put(`/session-notes/${id}`, sessionNoteData);
       return response.data;
     } catch (error) {
       throw error;
@@ -54,7 +54,7 @@ const SessionNoteService = {
   // Delete a session note
   deleteSessionNote: async (id) => {
     try {
-      const response = await api.delete(`/sessionNotes/${id}`);
+      const response = await api.delete(`/session-notes/${id}`);
       return response.data;
     } catch (error) {
       throw error;

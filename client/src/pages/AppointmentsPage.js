@@ -1,11 +1,13 @@
 // client/src/pages/AppointmentsPage.js
 import React, { useEffect, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import AppointmentService from '../services/appointment.service';
 import ClientService from '../services/client.service';
 import AuthService from '../services/auth.service';
 import '../styles/AppointmentsPage.css';
 
 const AppointmentsPage = () => {
+  const location = useLocation();
   const [appointments, setAppointments] = useState([]);
   const [clients, setClients] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -55,6 +57,17 @@ const AppointmentsPage = () => {
           setPractitionerId(currentUser.id);
         }
         
+        // Check if we need to edit a specific appointment from the location state
+        if (location.state?.editAppointmentId) {
+          const appointmentToEdit = appointmentsData.find(
+            app => app.id === location.state.editAppointmentId
+          );
+          
+          if (appointmentToEdit) {
+            openForm(appointmentToEdit);
+          }
+        }
+        
         setError(null);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -65,7 +78,7 @@ const AppointmentsPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [location.state]);
 
   // Open form in "create" or "edit" mode
   const openForm = (appt = null) => {
@@ -264,8 +277,8 @@ const AppointmentsPage = () => {
 
       {/* Modal */}
       {showForm && (
-        <div className="modal-overlay">
-          <div className="modal" ref={modalRef} onKeyDown={handleKeyDown}>
+        <div className="custom-backdrop">
+          <div className="custom-content" ref={modalRef} onKeyDown={handleKeyDown}>
             <h3>{editAppointment ? 'Edit Appointment' : 'New Appointment'}</h3>
             <form onSubmit={handleSubmit}>
               {errorMessage && <div className="error-message">{errorMessage}</div>}

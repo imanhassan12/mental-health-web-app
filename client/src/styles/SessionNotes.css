@@ -2,20 +2,152 @@
 
 .session-notes-page {
   padding: 20px;
+  background-color: #f5f8fb;
 }
 
 .session-notes-page h2 {
   margin-bottom: 20px;
+  color: #333;
+  font-size: 1.8rem;
 }
 
-.session-note-form .form-group {
+.session-notes-page h3 {
+  margin-bottom: 15px;
+  color: #444;
+  font-size: 1.3rem;
+}
+
+/* Container for the two-column layout */
+.session-notes-container {
+  display: flex;
+  gap: 25px;
+}
+
+/* Left column - Filter section */
+.filter-section {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Right column - Add note section */
+.add-note-section {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Form group styling */
+.form-group {
   margin-bottom: 15px;
 }
 
-.session-note-form label {
+.form-group label {
   display: block;
   font-weight: 600;
   margin-bottom: 5px;
+  color: #444;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #2aa09b;
+  box-shadow: 0 0 0 2px rgba(42, 160, 155, 0.2);
+}
+
+/* Filtered notes section */
+.filtered-notes {
+  margin-top: 25px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.no-notes-message {
+  color: #777;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.note-item {
+  background-color: #f9f9f9;
+  border-left: 4px solid #2aa09b;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.note-client {
+  font-weight: 600;
+  color: #333;
+}
+
+.note-date {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.note-mood {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.mood-rating {
+  font-weight: 600;
+  color: #2aa09b;
+}
+
+.note-content {
+  margin-bottom: 10px;
+  line-height: 1.4;
+  color: #444;
+  white-space: pre-line;
+}
+
+.view-client-link {
+  display: inline-block;
+  color: #2aa09b;
+  font-size: 0.9rem;
+  text-decoration: none;
+  margin-top: 5px;
+}
+
+.view-client-link:hover {
+  text-decoration: underline;
+}
+
+/* Session note form */
+.session-note-form {
+  width: 100%;
 }
 
 .session-note-form input[type="number"],
@@ -23,19 +155,57 @@
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 4px;
-  padding: 8px;
+  padding: 8px 12px;
 }
 
-.session-note-form button {
+.session-note-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.save-note-btn {
+  display: block;
+  width: 100%;
   padding: 10px 16px;
   border: none;
   border-radius: 4px;
-  background-color: #38c5b4; /*  teal shade */
+  background-color: #2aa09b;
   color: #fff;
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.session-note-form button:hover {
-  background-color: #2aa09b;
+.save-note-btn:hover {
+  background-color: #248f8b;
+}
+
+.save-note-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Loading and error states */
+.loading, .error-container {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  color: #e74c3c;
+  margin-bottom: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .session-notes-container {
+    flex-direction: column;
+  }
+  
+  .filter-section, .add-note-section {
+    width: 100%;
+  }
 }

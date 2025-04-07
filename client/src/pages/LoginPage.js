@@ -66,7 +66,8 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const userData = {
-        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
         username: newUsername,
         password: newPassword,
         email: `${newUsername}@example.com`, // This should be changed in a real app

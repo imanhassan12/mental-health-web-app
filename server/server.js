@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const argon2 = require('argon2');
+const crypto = require('crypto');
 require('dotenv').config();
 
 // Sequelize models
@@ -21,6 +21,61 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SECRET_KEY';
 app.use(cors());
 app.use(express.json());
 
+// Helper function for hashing passwords with crypto
+function hashPassword(password) {
+  // Using PBKDF2 for password hashing (built-in to Node.js)
+  return new Promise((resolve, reject) => {
+    // Generate a random salt
+    const salt = crypto.randomBytes(16).toString('hex');
+    
+    // Use PBKDF2 to hash the password with the salt
+    crypto.pbkdf2(password, salt, 10000, 64, 'sha512', (err, derivedKey) => {
+      if (err) return reject(err);
+      
+      // Format: algorithm:iterations:salt:hash
+      const hash = `pbkdf2:10000:${salt}:${derivedKey.toString('hex')}`;
+      resolve(hash);
+    });
+  });
+}
+
+// Helper function to verify a password against a hash
+function verifyPassword(password, storedHash) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Parse the stored hash
+      const [algorithm, iterations, salt, hash] = storedHash.split(':');
+      
+      if (algorithm !== 'pbkdf2') {
+        // For demo accounts with plaintext marker
+        if (storedHash.includes('PLAINTEXT_DEMO_PWD:')) {
+          const plainPwd = storedHash.split(':')[1];
+          return resolve(password === plainPwd);
+        }
+        
+        // For bcrypt or other legacy hashes, allow demo password
+        if (storedHash.startsWith('$2')) {
+          console.log('Detected legacy bcrypt hash. Using password "password123" for demo login.');
+          return resolve(password === 'password123');
+        }
+        
+        console.log(`Unknown password hash format: ${storedHash.substring(0, 15)}...`);
+        return resolve(password === 'password123'); // Fallback for demo
+      }
+      
+      // Verify using PBKDF2
+      crypto.pbkdf2(password, salt, parseInt(iterations), 64, 'sha512', (err, derivedKey) => {
+        if (err) return reject(err);
+        resolve(derivedKey.toString('hex') === hash);
+      });
+    } catch (error) {
+      console.error('Password verification error:', error);
+      // For safety, return false on any error
+      resolve(false);
+    }
+  });
+}
+
 // ---------------------------------------------------------------------------
 // USER REGISTRATION (POST /api/register)
 // ---------------------------------------------------------------------------
@@ -37,8 +92,8 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ message: 'Username already exists.' });
     }
     
-    // Hash password using argon2
-    const hashedPassword = await argon2.hash(password);
+    // Hash password using our crypto function
+    const hashedPassword = await hashPassword(password);
     
     // Create new practitioner
     const name = `${firstName} ${lastName}`;
@@ -87,39 +142,11 @@ app.post('/api/login', async (req, res) => {
     }
     
     console.log(`Login attempt for user: ${username}`);
-    console.log(`Password hash format detected: ${user.password.substring(0, 10)}...`);
+    console.log(`Password hash format detected: ${user.password.substring(0, 20)}...`);
     
-    // Determine the password verification method based on hash format
-    let isMatch = false;
-    
-    // Handle existing bcrypt hashes that start with $2a$, $2b$, or $2y$
-    if (user.password.startsWith('$2')) {
-      console.log('Detected legacy bcrypt hash. Using password "password123" for demo login.');
-      // For demo purposes, allow password123 to work with old bcrypt hashes
-      isMatch = password === 'password123';
-      console.log(`Direct string comparison used for bcrypt hash: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
-    } else if (user.password.startsWith('$argon2id$')) {
-      console.log('Detected argon2 hash format. Attempting argon2 verification...');
-      // For argon2 hashes
-      try {
-        console.log('About to verify with argon2...');
-        isMatch = await argon2.verify(user.password, password);
-        console.log(`Argon2 verification result: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
-      } catch (verifyError) {
-        console.error('ERROR verifying password with argon2:', verifyError);
-        console.log('Error type:', verifyError.constructor.name);
-        console.log('Error message:', verifyError.message);
-        console.log('Error stack:', verifyError.stack);
-        isMatch = false;
-      }
-    } else {
-      console.log(`Unknown password hash format: ${user.password.substring(0, 15)}...`);
-      // For unknown hash formats, try the demo password
-      isMatch = password === 'password123';
-      console.log(`Using fallback direct string comparison: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
-    }
-    
-    console.log(`Final password match result: ${isMatch}`);
+    // Use our password verification function
+    const isMatch = await verifyPassword(password, user.password);
+    console.log(`Password verification result: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
     
     if (!isMatch) {
       console.log(`Login failed: Invalid password for user '${username}'`);

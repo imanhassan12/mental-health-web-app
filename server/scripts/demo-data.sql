@@ -9,11 +9,13 @@ DELETE FROM Clients;
 DELETE FROM Practitioners;
 
 -- Demo Practitioners
--- Note: In a real application, passwords would be properly hashed, but for this demo we're using placeholder encrypted strings
+-- Using PBKDF2 hashing (Node.js built-in) with a consistent salt for demo accounts
+-- Format: pbkdf2:iterations:salt:hash
+-- Both passwords are 'password123'
 INSERT INTO Practitioners (id, name, username, password, email, createdAt, updatedAt) VALUES
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Jane Smith', 'jsmith', '$argon2id$v=19$m=65536,t=3,p=4$I6vv2WIRdtgTT/b1JkGMSQ$JtuSWVR7HAdEC5/iNV8fe5dg0K3NbV6EZWsKdq5jm7o', 'jane.smith@example.com', NOW(), NOW()),
-('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Dr. Michael Johnson', 'mjohnson', '$argon2id$v=19$m=65536,t=3,p=4$I6vv2WIRdtgTT/b1JkGMSQ$JtuSWVR7HAdEC5/iNV8fe5dg0K3NbV6EZWsKdq5jm7o', 'michael.johnson@example.com', NOW(), NOW());
--- Note: Both passwords are set to 'password123' if you were to hash them properly
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Jane Smith', 'jsmith', 'pbkdf2:10000:demo_salt_for_consistency_1234567890:1f47a3e28cd7faca48da44b71129f82ca8be704f09f881f61b9fe1265a3661c64334b36f0ce94e9ef8c6e14c6840d5a4a8773e36cc0431a9fde496768b5c94ea', 'jane.smith@example.com', NOW(), NOW()),
+('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Dr. Michael Johnson', 'mjohnson', 'pbkdf2:10000:demo_salt_for_consistency_1234567890:1f47a3e28cd7faca48da44b71129f82ca8be704f09f881f61b9fe1265a3661c64334b36f0ce94e9ef8c6e14c6840d5a4a8773e36cc0431a9fde496768b5c94ea', 'michael.johnson@example.com', NOW(), NOW());
+-- Note: Both passwords are set to 'password123'
 
 -- Demo Clients
 INSERT INTO Clients (id, name, phone, notes, createdAt, updatedAt) VALUES
