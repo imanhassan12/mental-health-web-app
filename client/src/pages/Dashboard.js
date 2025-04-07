@@ -33,7 +33,6 @@ const Dashboard = () => {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [alerts, setAlerts] = useState([]); // e.g. array of "risk" items
   const [recentClients, setRecentClients] = useState([]);
-  const [topGoals, setTopGoals] = useState([]);
   const [recentNotes, setRecentNotes] = useState([]);
   const [todaysAppointments, setTodaysAppointments] = useState([]);
   const [todaysAppt, setTodaysAppt] = useState('--'); // For today's appointment count
@@ -43,239 +42,233 @@ const Dashboard = () => {
     Promise.all([
       api.get('/dashboard-stats'),
       api.get('/dashboard-clients'),
-      api.get('/dashboard-notes'),
+      api.get('/dashboard-notes')
     ])
-    .then(([statsResponse, clientsResponse, notesResponse]) => {
-      const statsData = statsResponse.data;
-      const clientsData = clientsResponse.data;
-      const notesData = notesResponse.data;
-      
-      setActiveClients(statsData.activeClients);
-      setAvgMood(statsData.avgMood);
-      setUpcomingCount(statsData.upcomingAppointments);
-      setAlerts(statsData.alerts);
-      setRecentClients(clientsData.recent || []);
-      setTopGoals(statsData.topGoals || []);
-      setRecentNotes(notesData.recent || []);
-      setTodaysAppointments(statsData.todaysAppointments || []);
-      
-      // Set today's appointment count
-      if (statsData.todaysAppointments && Array.isArray(statsData.todaysAppointments)) {
-        setTodaysAppt(statsData.todaysAppointments.length);
-      }
-    })
-    .catch(err => console.error('Error fetching dashboard data:', err));
+      .then(([statsResponse, clientsResponse, notesResponse]) => {
+        const statsData = statsResponse.data;
+        const clientsData = clientsResponse.data;
+        const notesData = notesResponse.data;
+        
+        // Set the state based on API response
+        setActiveClients(statsData.activeClients || 0);
+        setAvgMood(statsData.avgMood || '--');
+        setUpcomingCount(statsData.upcomingAppointments || 0);
+        setTodaysAppt(statsData.todaysAppointments ? statsData.todaysAppointments.length : 0);
+        setTodaysAppointments(statsData.todaysAppointments || []);
+        
+        // Set other state variables from API
+        setRecentClients(clientsData.recent || []);
+        setRecentNotes(notesData.recent || []);
+      })
+      .catch(error => {
+        console.error('Error fetching dashboard data:', error);
+      });
   }, []);
 
-  // Prepare mood chart data
-  const moodChartData = {
-    labels: recentNotes.map(note => note.sessionDate || '').slice(0, 10).reverse(),
-    datasets: [
-      {
-        label: 'Mood Rating',
-        data: recentNotes.map(note => note.moodRating || null).slice(0, 10).reverse(),
-        borderColor: '#2aa09b',
-        backgroundColor: 'rgba(42, 160, 155, 0.2)',
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: '#2aa09b',
-        pointHoverBackgroundColor: '#1e7772', 
-        pointBorderColor: '#fff',
-        pointHoverBorderColor: '#fff',
-        pointRadius: 4,
-        pointHoverRadius: 6
-      },
-    ],
+  // Prepare data for the overall mood trend chart
+  const prepareMoodData = () => {
+    const labels = recentNotes.map(note => note.sessionDate).reverse();
+    const data = recentNotes.map(note => note.moodRating).reverse();
+    
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Mood Rating',
+          data,
+          borderColor: 'rgb(42, 160, 155)',
+          backgroundColor: 'rgba(42, 160, 155, 0.2)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: 'rgb(42, 160, 155)',
+          pointHoverBackgroundColor: 'rgb(255, 255, 255)',
+          pointBorderColor: 'rgb(42, 160, 155)',
+          pointHoverBorderColor: 'rgb(42, 160, 155)',
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }
+      ]
+    };
   };
 
-  // Chart options
+  // Prepare data for the daily mood trend chart (secondary chart)
+  const prepareDailyMoodData = () => {
+    if (recentNotes.length === 0) return null;
+    
+    // Process notes to get day-wise mood averages for the last 7 days
+    const today = new Date();
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    
+    // Create an array of the last 7 days as labels
+    const dayLabels = [];
+    const dayData = Array(7).fill(null);
+    
+    for (let i = 6; i >= 0; i--) {
+      const day = new Date(today);
+      day.setDate(today.getDate() - i);
+      dayLabels.push(day.toLocaleDateString('en-US', { weekday: 'short' }));
+    }
+    
+    // Calculate average mood for each day from notes
+    recentNotes.forEach(note => {
+      const noteDate = new Date(note.sessionDate);
+      
+      // Skip if note is older than 7 days
+      if (noteDate < sevenDaysAgo) return;
+      
+      // Find which day index this note belongs to
+      const diffTime = Math.abs(today - noteDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const dayIndex = 6 - diffDays; // Reverse index because our array goes backward
+      
+      if (dayIndex >= 0 && dayIndex < 7) {
+        if (dayData[dayIndex] === null) {
+          dayData[dayIndex] = { sum: note.moodRating, count: 1 };
+        } else {
+          dayData[dayIndex].sum += note.moodRating;
+          dayData[dayIndex].count += 1;
+        }
+      }
+    });
+    
+    // Convert to averages
+    const moodAverages = dayData.map(day => 
+      day === null ? null : Math.round((day.sum / day.count) * 10) / 10
+    );
+    
+    return {
+      labels: dayLabels,
+      datasets: [
+        {
+          label: 'Daily Mood Average',
+          data: moodAverages,
+          borderColor: 'rgb(103, 183, 209)',
+          backgroundColor: 'rgba(103, 183, 209, 0.2)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: 'rgb(103, 183, 209)',
+          pointHoverBackgroundColor: 'rgb(255, 255, 255)',
+          pointBorderColor: 'rgb(103, 183, 209)',
+          pointHoverBorderColor: 'rgb(103, 183, 209)',
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }
+      ]
+    };
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       y: {
-        min: 0,
-        max: 10,
         beginAtZero: true,
+        max: 10,
         ticks: {
-          stepSize: 1,
-          precision: 0
+          stepSize: 1
         },
         grid: {
           display: true,
-          drawBorder: true,
           color: 'rgba(200, 200, 200, 0.2)'
         },
         title: {
           display: true,
-          text: 'Mood Rating',
-          font: {
-            size: 14
-          }
+          text: 'Mood Rating'
         }
       },
       x: {
         grid: {
-          display: true,
-          drawBorder: true,
-          color: 'rgba(200, 200, 200, 0.2)'
+          display: false
         },
         title: {
           display: true,
-          text: 'Date',
-          font: {
-            size: 14
-          }
+          text: 'Date'
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45
         }
       }
     },
     plugins: {
-      legend: {
-        display: false
-      },
       tooltip: {
-        enabled: true,
-        mode: 'index',
-        intersect: false,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        titleFont: {
-          size: 14
-        },
-        bodyFont: {
-          size: 13
-        },
-        padding: 10,
         callbacks: {
-          title: (tooltipItems) => {
-            return `Date: ${tooltipItems[0].label}`;
+          title: function(tooltipItems) {
+            return tooltipItems[0].label;
           },
-          label: (context) => {
-            return `Mood Rating: ${context.parsed.y}/10`;
+          label: function(context) {
+            return `Mood: ${context.raw}/10`;
           }
         }
-      }
-    },
-    interaction: {
-      mode: 'nearest',
-      axis: 'x',
-      intersect: false
-    },
-    elements: {
-      line: {
-        tension: 0.4,
-        borderWidth: 2,
-        fill: true
-      },
-      point: {
-        radius: 4,
-        hitRadius: 10,
-        hoverRadius: 6,
-        hoverBorderWidth: 2
       }
     }
   };
 
-  // Dummy data for overall mood trend - in a real app, you'd get this from the API
-  const overallMoodTrendData = {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-    datasets: [
-      {
-        label: 'Aggregate Mood',
-        data: [5, 6, 7, 5.5, 6.8, 7.2],
-        borderColor: '#67B7D1',
-        backgroundColor: 'rgba(103, 183, 209, 0.2)',
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: '#67B7D1',
-        pointHoverBackgroundColor: '#3399CC', 
-        pointBorderColor: '#fff',
-        pointHoverBorderColor: '#fff',
-        pointRadius: 5,
-        pointHoverRadius: 7
+  const dailyChartOptions = {
+    ...chartOptions,
+    scales: {
+      ...chartOptions.scales,
+      y: {
+        ...chartOptions.scales.y,
+        title: {
+          display: true,
+          text: 'Daily Mood Average'
+        }
       },
-    ],
+      x: {
+        ...chartOptions.scales.x,
+        title: {
+          display: true,
+          text: 'Day'
+        }
+      }
+    }
   };
+
+  const moodChartData = prepareMoodData();
+  const dailyMoodData = prepareDailyMoodData();
 
   return (
     <div className="dashboard-page">
-      <h2 className="dashboard-title">Overview</h2>
-
-      {/* Top Stats Row */}
+      <h2 className="dashboard-title">Dashboard</h2>
+      
+      {/* Top stats row */}
       <div className="dashboard-stats-row">
         <div className="stat-card">
           <h3>Active Clients</h3>
-          <p className="stat-value">{activeClients}</p>
+          <div className="stat-value">{activeClients}</div>
         </div>
-
+        
         <div className="stat-card">
-          <h3>Avg Mood</h3>
-          <p className="stat-value">{avgMood || '--'}</p>
+          <h3>Average Mood</h3>
+          <div className="stat-value">{avgMood}</div>
         </div>
-
+        
         <div className="stat-card">
           <h3>Upcoming Appointments</h3>
-          <p className="stat-value">{upcomingCount}</p>
+          <div className="stat-value">{upcomingCount}</div>
         </div>
-
+        
         <div className="stat-card">
-          <h3>Today's Appt</h3>
-          <p className="stat-value">{todaysAppt}</p>
+          <h3>Today's Appointments</h3>
+          <div className="stat-value">{todaysAppt}</div>
         </div>
       </div>
-
-      {/* Alerts */}
-      <div className="alerts-section">
-        <h3>Alerts</h3>
-        {alerts.length === 0 ? (
-          <p>No urgent alerts</p>
-        ) : (
-          <ul>
-            {alerts.map(alert => (
-              <li key={alert.id}>
-                {alert.message} <Link to={alert.link}>View</Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Overall Mood Trend */}
-      <div className="mood-trend-section">
-        <h3>Overall Mood Trend</h3>
-        <p>All Assigned Clients (Aggregate)</p>
-        <div className="chart-container">
-          <Line data={overallMoodTrendData} options={chartOptions} />
+      
+      {/* Appointment Calendar - Full Width */}
+      <div className="full-width-section">
+        <div className="appointment-section">
+          <h3>Appointment Calendar</h3>
+          <FullCalendar />
+          <Link to="/appointments" className="view-link">Manage Appointments</Link>
         </div>
-        <Link to="/analytics" className="view-link">View Full Mood Analytics</Link>
       </div>
-
-      {/* Appointment Calendar Section */}
-      <div className="appointment-section">
-        <h3>Appointments Calendar</h3>
-        <FullCalendar />
-      </div>
-
-      {/* Next Row: Clients, Mood Trends, Goals */}
-      <div className="dashboard-lower-row">
-        <div className="dashboard-card">
-          <h3>Clients</h3>
-          {recentClients.length === 0 ? (
-            <p>No recent updates.</p>
-          ) : (
-            <ul>
-              {recentClients.map(c => (
-                <li key={c.id}>
-                  {c.name}: Last Check-In {c.lastCheckIn} | Mood: {c.mood}/10
-                </li>
-              ))}
-            </ul>
-          )}
-          <Link to="/clients">View All Clients</Link>
-        </div>
-
-        {/* Mood Trends Chart */}
-        <div className="dashboard-card">
-          <h3>Mood Trends</h3>
+      
+      {/* Overall Mood Trend - Full Width */}
+      <div className="full-width-section">
+        <div className="mood-trend-section">
+          <h3>Overall Mood Trend</h3>
           {recentNotes.length === 0 ? (
             <p>No mood data available.</p>
           ) : (
@@ -283,70 +276,39 @@ const Dashboard = () => {
               <Line data={moodChartData} options={chartOptions} />
             </div>
           )}
-          <Link to="/progress">See Full Analytics</Link>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>Goals</h3>
-          {topGoals.length === 0 ? (
-            <p>No goals set.</p>
-          ) : (
-            topGoals.map(goal => (
-              <div key={goal.id} className="goal-item">
-                <p>{goal.title}</p>
-                <div className="goal-bar">
-                  <div
-                    className="goal-bar-fill"
-                    style={{ width: `${goal.progress}%` }}
-                  />
-                </div>
-                <span>{goal.progress}%</span>
-              </div>
-            ))
-          )}
-          <Link to="/goals">Manage Goals</Link>
+          <Link to="/notes" className="view-link">View Session Notes</Link>
         </div>
       </div>
 
-      {/* Another Row: Session Notes & Today's Appointments */}
+      {/* Bottom row: Recent Activity and Daily Mood Trend */}
       <div className="dashboard-lower-row">
-      
-<div className="dashboard-card">
-  <h3>Session Notes</h3>
-  {recentNotes.length === 0 ? (
-    <p>No recent notes.</p>
-  ) : (
-    <ul>
-      {recentNotes.map(note => (
-        <li key={note.id}>
-          <strong>{note.sessionDate}</strong> - {note.moodRating || '--'}/10 mood
-          <Link to={`/sessionNotes/${note.id}`}> View</Link>
-        </li>
-      ))}
-    </ul>
-  )}
-  {/* Quick link to add a new note */}
-  <Link to="/sessionNotes/new" className="btn primary small-btn">
-    + Add Session Note
-  </Link>
-</div>
-
-
         <div className="dashboard-card">
-          <h3>Today's Appointments</h3>
-          {todaysAppointments.length === 0 ? (
-            <p>No appointments scheduled today.</p>
+          <h3>Recent Clients</h3>
+          {recentClients.length === 0 ? (
+            <p>No recent client activity.</p>
           ) : (
             <ul>
-              {todaysAppointments.map(a => (
-                <li key={a.id}>
-                  {new Date(a.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  {' '}– {a.clientName}
-                  <Link to={`/appointments/${a.id}`}> Details</Link>
+              {recentClients.map(client => (
+                <li key={client.id}>
+                  <strong>{client.name}</strong> - Last check-in: {client.lastCheckIn}, Mood: {client.mood || '--'}
+                  <Link to={`/clients/${client.id}`}> View</Link>
                 </li>
               ))}
             </ul>
           )}
+          <Link to="/clients" className="view-link">View All Clients</Link>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>Daily Mood Trend</h3>
+          {!dailyMoodData ? (
+            <p>No recent mood data available.</p>
+          ) : (
+            <div className="chart-container">
+              <Line data={dailyMoodData} options={dailyChartOptions} />
+            </div>
+          )}
+          <Link to="/notes" className="view-link">View Session Notes</Link>
         </div>
       </div>
     </div>

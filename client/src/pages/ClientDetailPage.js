@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ClientService from '../services/client.service';
 import SessionNoteService from '../services/sessionNote.service';
-import GoalService from '../services/goal.service';
 import AppointmentService from '../services/appointment.service';
 import '../styles/ClientDetailPage.css';
 
@@ -12,7 +11,6 @@ const ClientDetailPage = () => {
   const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [sessionNotes, setSessionNotes] = useState([]);
-  const [goals, setGoals] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,14 +25,12 @@ const ClientDetailPage = () => {
         setClient(clientData);
         
         // Fetch related data
-        const [notesData, goalsData, appointmentsData] = await Promise.all([
+        const [notesData, appointmentsData] = await Promise.all([
           SessionNoteService.getClientSessionNotes(clientId),
-          GoalService.getClientGoals(clientId),
           AppointmentService.getClientAppointments(clientId)
         ]);
         
         setSessionNotes(notesData);
-        setGoals(goalsData);
         setAppointments(appointmentsData);
         
         setError(null);
@@ -122,29 +118,6 @@ const ClientDetailPage = () => {
                 View all {sessionNotes.length} notes
               </Link>
             )}
-          </ul>
-        )}
-      </div>
-
-      {/* Goals Section */}
-      <div className="section">
-        <div className="section-header">
-          <h3>Goals</h3>
-          <Link to={`/clients/${clientId}/goals/new`} className="btn small">+ Add Goal</Link>
-        </div>
-        {goals.length === 0 ? (
-          <p>No goals found.</p>
-        ) : (
-          <ul className="goals-list">
-            {goals.map((goal) => (
-              <li key={goal.id} className="goal-item">
-                <Link to={`/goals/${goal.id}`}>
-                  <h4>{goal.title}</h4>
-                  <span className={`status ${goal.status}`}>{goal.status}</span>
-                  <p>{goal.description.substring(0, 100)}...</p>
-                </Link>
-              </li>
-            ))}
           </ul>
         )}
       </div>

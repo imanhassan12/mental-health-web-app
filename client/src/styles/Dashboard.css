@@ -1,104 +1,99 @@
 /* client/src/styles/Dashboard.css */
 
-/* Overall dashboard container */
+/* Dashboard page container */
 .dashboard-page {
   padding: 20px;
-  background: #f5f8fb; /* Align with your brand theme */
+  background-color: #f9f9f9;
 }
 
-/* Title for the main section */
+/* Dashboard title */
 .dashboard-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #2e3d49;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 500;
 }
 
-/* Stats row with small metric cards */
+/* Stats row container */
 .dashboard-stats-row {
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
   margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
+/* Individual stat card */
 .stat-card {
-  background: #fff;
-  flex: 1;
-  min-width: 120px;
-  border-radius: 6px;
+  background: white;
+  border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  text-align: center;
-  transition: transform 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 200px;
+  margin: 0 10px 15px 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .stat-card h3 {
   font-size: 1.1rem;
-  color: #555;
-  margin-bottom: 8px;
+  color: #666;
+  margin-bottom: 10px;
+  font-weight: 500;
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #2aa09b; /* teal accent for key numbers */
+  color: #2aa09b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Alerts or Risky Clients */
-.alerts-section {
+/* Dashboard middle row with calendar and trend */
+.dashboard-middle-row {
+  display: flex;
+  gap: 25px;
   margin-bottom: 30px;
-  background: #fff;
-  border-radius: 6px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  flex-wrap: wrap;
 }
 
-.alerts-section h3 {
-  margin-bottom: 12px;
-  font-size: 1.2rem;
-}
-
-/* Overall Mood Trend Section */
+/* Mood trend section */
 .mood-trend-section {
-  margin-bottom: 30px;
-  background: #fff;
-  border-radius: 6px;
+  background: white;
+  border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 300px;
   width: 100%;
 }
 
 .mood-trend-section h3 {
-  margin-bottom: 5px;
   font-size: 1.2rem;
   color: #333;
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 
 .mood-trend-section p {
   color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
 }
 
 .chart-container {
-  height: 350px;
   position: relative;
-  margin-bottom: 15px;
+  height: 350px;
   width: 100%;
-  box-sizing: border-box;
+  margin-bottom: 15px;
 }
 
-/* Target specifically the Overall Mood Trend chart container for special styling */
-.mood-trend-section .chart-container {
-  padding: 10px 0;
-  border-radius: 4px;
-}
-
-/* CSS to ensure charts are responsive */
 @media (max-width: 768px) {
   .chart-container {
     height: 300px;
@@ -111,123 +106,130 @@
   }
 }
 
-/* Appointment Section */
+.mood-trend-section .chart-container {
+  padding: 5px;
+  border-radius: 5px;
+}
+
+/* Appointment section */
 .appointment-section {
-  margin-bottom: 30px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+  min-width: 300px;
 }
 
 .appointment-section h3 {
-  margin-bottom: 15px;
   font-size: 1.2rem;
   color: #333;
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 
+/* View link style */
 .view-link {
   display: inline-block;
   color: #2aa09b;
-  font-size: 0.9rem;
   text-decoration: none;
-  margin-top: 10px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+  padding: 2px 0;
 }
 
 .view-link:hover {
-  text-decoration: underline;
+  border-bottom-color: #2aa09b;
+  transform: translateY(-2px);
 }
 
-/* Lower row for multiple cards */
+/* Dashboard lower row for cards */
 .dashboard-lower-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  gap: 25px;
   margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
-/* Generic card for the rest of the sections (Clients, Mood Trends, etc.) */
+/* Dashboard card style */
 .dashboard-card {
-  background: #fff;
-  flex: 1;
-  min-width: 250px; /* to handle smaller screens */
-  border-radius: 6px;
+  background: white;
+  border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  transition: transform 0.2s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 300px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dashboard-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .dashboard-card h3 {
   font-size: 1.2rem;
-  margin-bottom: 16px;
   color: #333;
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 
-/* Chart container inside dashboard card */
 .dashboard-card .chart-container {
   height: 200px;
   margin-bottom: 15px;
-  width: 100%;
   padding: 5px 0;
+  width: 100%;
 }
 
-/* Goals styling */
-.goal-item {
-  margin-bottom: 12px;
-}
-
-.goal-bar {
-  background: #e0e0e0;
-  border-radius: 5px;
-  overflow: hidden;
-  height: 10px;
-  margin-top: 4px;
-  margin-bottom: 6px;
-}
-
-.goal-bar-fill {
-  background: #ff6f61; /* coral accent for progress */
-  height: 100%;
-  transition: width 0.3s;
-}
-
-/* Small button styles */
-.btn.primary.small-btn {
+.dashboard-card a {
   display: inline-block;
-  background: #2aa09b;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
+  color: #2aa09b;
   text-decoration: none;
-  font-size: 0.85rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
   margin-top: 10px;
 }
 
-.btn.primary.small-btn:hover {
-  background: #248f8b;
-}
-
-/* Links inside the card */
-.dashboard-card a {
-  display: inline-block;
-  margin-top: 8px;
-  color: #2aa09b;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s;
-}
-
 .dashboard-card a:hover {
-  color: #248f8b;
+  border-bottom-color: #2aa09b;
+  transform: translateY(-2px);
 }
 
-/* Additional styling for lists, etc. */
 .dashboard-card ul {
-  list-style: none;
+  list-style-type: none;
   padding-left: 0;
-  margin: 0;
 }
+
 .dashboard-card li {
-  margin-bottom: 8px;
-  line-height: 1.4;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* Responsive layout */
+@media (max-width: 1100px) {
+  .dashboard-middle-row,
+  .dashboard-lower-row {
+    flex-direction: column;
+  }
+  
+  .mood-trend-section,
+  .appointment-section,
+  .dashboard-card {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats-row {
+    flex-wrap: wrap;
+  }
+  
+  .stat-card {
+    min-width: calc(50% - 15px);
+    margin-bottom: 15px;
+  }
 }

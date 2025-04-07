@@ -383,9 +383,6 @@ app.get('/api/dashboard-stats', async (req, res) => {
     // Count session notes
     const sessionNotesCount = await SessionNote.count();
     
-    // Count goals
-    const goalsCount = await Goal.count();
-    
     // Calculate average mood from session notes (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -432,20 +429,6 @@ app.get('/api/dashboard-stats', async (req, res) => {
       title: appt.title
     }));
     
-    // Get top goals (just take the most recent 3 for now)
-    const topGoals = await Goal.findAll({
-      limit: 3,
-      order: [['createdAt', 'DESC']],
-      include: [{ model: Client, as: 'client' }]
-    });
-    
-    // Map goals to the format the frontend expects
-    const formattedTopGoals = topGoals.map(goal => ({
-      id: goal.id,
-      title: goal.title,
-      progress: goal.status === 'completed' ? 100 : (goal.status === 'in progress' ? 50 : 0)
-    }));
-    
     // Get recent activity (latest 5 appointments)
     const recentAppointments = await Appointment.findAll({
       limit: 5,
@@ -458,9 +441,7 @@ app.get('/api/dashboard-stats', async (req, res) => {
       avgMood,
       upcomingAppointments,
       sessionNotesCount,
-      goalsCount,
       recentAppointments,
-      topGoals: formattedTopGoals,
       todaysAppointments: formattedTodaysAppointments,
       alerts: [] // No alerts for now
     });
