@@ -280,9 +280,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Bottom row: Recent Activity and Daily Mood Trend */}
+      {/* Bottom row: Recent Activity only (full width) */}
       <div className="dashboard-lower-row">
-        <div className="dashboard-card">
+        <div className="dashboard-card full-width">
           <h3>Recent Clients</h3>
           {recentClients.length === 0 ? (
             <p>No recent client activity.</p>
@@ -297,18 +297,6 @@ const Dashboard = () => {
             </ul>
           )}
           <Link to="/clients" className="view-link">View All Clients</Link>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>Daily Mood Trend</h3>
-          {!dailyMoodData ? (
-            <p>No recent mood data available.</p>
-          ) : (
-            <div className="chart-container">
-              <Line data={dailyMoodData} options={dailyChartOptions} />
-            </div>
-          )}
-          <Link to="/notes" className="view-link">View Session Notes</Link>
         </div>
       </div>
     </div>
