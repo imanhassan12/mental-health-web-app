@@ -4,7 +4,7 @@ const argon2 = require('argon2');
 const password = 'password123';
 
 // The stored bcrypt hash from the demo data
-const storedBcryptHash = '$2b$10$W2Qj6oIZGnSCQhRyejyubeQ5Ry0n4bBCi0s.qk40pz4scvSj1UWDW';
+const storedBcryptHash = '$argon2id$v=19$m=65536,t=3,p=4$I6vv2WIRdtgTT/b1JkGMSQ$JtuSWVR7HAdEC5/iNV8fe5dg0K3NbV6EZWsKdq5jm7o';
 
 async function testPassword() {
   try {

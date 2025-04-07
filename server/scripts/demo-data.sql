@@ -11,8 +11,8 @@ DELETE FROM Practitioners;
 -- Demo Practitioners
 -- Note: In a real application, passwords would be properly hashed, but for this demo we're using placeholder encrypted strings
 INSERT INTO Practitioners (id, name, username, password, email, createdAt, updatedAt) VALUES
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Jane Smith', 'jsmith', '$2b$10$W2Qj6oIZGnSCQhRyejyubeQ5Ry0n4bBCi0s.qk40pz4scvSj1UWDW', 'jane.smith@example.com', NOW(), NOW()),
-('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Dr. Michael Johnson', 'mjohnson', '$2b$10$W2Qj6oIZGnSCQhRyejyubeQ5Ry0n4bBCi0s.qk40pz4scvSj1UWDW', 'michael.johnson@example.com', NOW(), NOW());
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Jane Smith', 'jsmith', '$argon2id$v=19$m=65536,t=3,p=4$I6vv2WIRdtgTT/b1JkGMSQ$JtuSWVR7HAdEC5/iNV8fe5dg0K3NbV6EZWsKdq5jm7o', 'jane.smith@example.com', NOW(), NOW()),
+('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Dr. Michael Johnson', 'mjohnson', '$argon2id$v=19$m=65536,t=3,p=4$I6vv2WIRdtgTT/b1JkGMSQ$JtuSWVR7HAdEC5/iNV8fe5dg0K3NbV6EZWsKdq5jm7o', 'michael.johnson@example.com', NOW(), NOW());
 -- Note: Both passwords are set to 'password123' if you were to hash them properly
 
 -- Demo Clients
