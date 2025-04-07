@@ -2,26 +2,30 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Dashboard.css';
+import api from '../services/api'; // Import the API service
 
 const Dashboard = () => {
   const [activeClients, setActiveClients] = useState(0);
   const [avgMood, setAvgMood] = useState(null); 
   const [upcomingCount, setUpcomingCount] = useState(0);
-  const [alerts, setAlerts] = useState([]); // e.g. array of “risk” items
+  const [alerts, setAlerts] = useState([]); // e.g. array of "risk" items
   const [recentClients, setRecentClients] = useState([]);
   const [topGoals, setTopGoals] = useState([]);
   const [recentNotes, setRecentNotes] = useState([]);
   const [todaysAppointments, setTodaysAppointments] = useState([]);
 
   useEffect(() => {
-    // Example: fetch from your actual endpoints
+    // Use the api service instead of direct fetch
     Promise.all([
-      fetch('/api/dashboard-stats').then(r => r.json()),
-      fetch('/api/dashboard-clients').then(r => r.json()),
-      fetch('/api/dashboard-notes').then(r => r.json()),
-      // ... etc.
+      api.get('/dashboard-stats'),
+      api.get('/dashboard-clients'),
+      api.get('/dashboard-notes'),
     ])
-    .then(([statsData, clientsData, notesData]) => {
+    .then(([statsResponse, clientsResponse, notesResponse]) => {
+      const statsData = statsResponse.data;
+      const clientsData = clientsResponse.data;
+      const notesData = notesResponse.data;
+      
       setActiveClients(statsData.activeClients);
       setAvgMood(statsData.avgMood);
       setUpcomingCount(statsData.upcomingAppointments);
@@ -116,7 +120,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Another Row: Session Notes & Today’s Appointments */}
+      {/* Another Row: Session Notes & Today's Appointments */}
       <div className="dashboard-lower-row">
       
 <div className="dashboard-card">
@@ -141,7 +145,7 @@ const Dashboard = () => {
 
 
         <div className="dashboard-card">
-          <h3>Today’s Appointments</h3>
+          <h3>Today's Appointments</h3>
           {todaysAppointments.length === 0 ? (
             <p>No appointments scheduled today.</p>
           ) : (
