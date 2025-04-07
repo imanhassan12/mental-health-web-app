@@ -8,8 +8,10 @@ RUN apk add --no-cache mariadb-client python3 make g++ gcc musl-dev linux-header
 # Copy package.json and package-lock.json first for better caching
 COPY package*.json ./
 
-# Set environment variable to build native modules from source
+# Set environment variables for proper native module builds
 ENV npm_config_build_from_source=true
+# These are helpful for ARM Mac builds
+ENV npm_config_target_arch=arm64
 
 # Install dependencies
 RUN npm install
