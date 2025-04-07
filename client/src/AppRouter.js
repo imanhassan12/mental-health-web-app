@@ -11,6 +11,7 @@ import ResourcesPage from './pages/ResourcesPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import LoginPage from './pages/LoginPage';
 import ClientDetailPage from './pages/ClientDetailPage';
+import MoodAnalyticsPage from './pages/MoodAnalyticsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthService from './services/auth.service';
 
@@ -126,6 +127,16 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <AppointmentsPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Mood Analytics */}
+          <Route 
+            path="/mood-analytics" 
+            element={
+              <ProtectedRoute>
+                <MoodAnalyticsPage />
               </ProtectedRoute>
             } 
           />

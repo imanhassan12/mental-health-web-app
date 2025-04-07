@@ -1,7 +1,7 @@
 // client/src/components/Sidebar.js
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaUsers, FaClipboardList, FaBook, FaCalendarAlt } from 'react-icons/fa';
+import { FaHome, FaUsers, FaClipboardList, FaBook, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 
 const Sidebar = () => {
@@ -40,6 +40,12 @@ const Sidebar = () => {
         <NavLink to="/appointments" className={getActiveLinkClass}>
           <FaCalendarAlt className="sidebar__icon" />
           <span>Appointments</span>
+        </NavLink>
+        
+        {/* Mood Analytics with icon */}
+        <NavLink to="/mood-analytics" className={getActiveLinkClass}>
+          <FaChartLine className="sidebar__icon" />
+          <span>Mood Analytics</span>
         </NavLink>
       </nav>
     </aside>

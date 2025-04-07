@@ -261,7 +261,6 @@ const Dashboard = () => {
         <div className="appointment-section">
           <h3>Appointment Calendar</h3>
           <FullCalendar />
-          <Link to="/appointments" className="view-link">Manage Appointments</Link>
         </div>
       </div>
       
@@ -276,7 +275,10 @@ const Dashboard = () => {
               <Line data={moodChartData} options={chartOptions} />
             </div>
           )}
-          <Link to="/notes" className="view-link">View Session Notes</Link>
+          <div className="view-links">
+            <Link to="/notes" className="view-link">View Session Notes</Link>
+            <Link to="/mood-analytics" className="view-link">View Full Analytics</Link>
+          </div>
         </div>
       </div>
 
