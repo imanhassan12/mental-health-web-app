@@ -14,7 +14,8 @@ import ClientDetailPage from './pages/ClientDetailPage';
 import MoodAnalyticsPage from './pages/MoodAnalyticsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthService from './services/auth.service';
-
+import TasksPage from './pages/TasksPage';
+import RemindersPage from './pages/RemindersPage';
 const AppRouter = () => {
   const [isReady, setIsReady] = useState(false);
 
@@ -139,6 +140,26 @@ const AppRouter = () => {
                 <MoodAnalyticsPage />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Tasks */}
+          <Route 
+            path="/tasks" 
+            element={
+              <ProtectedRoute>
+                <TasksPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Reminders */}
+          <Route 
+            path="/reminders" 
+            element={
+              <ProtectedRoute>
+                <RemindersPage />
+              </ProtectedRoute>
+            }
           />
           
           {/* Catch all - redirect to Dashboard */}

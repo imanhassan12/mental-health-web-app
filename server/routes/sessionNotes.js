@@ -1,7 +1,7 @@
 // server/routes/sessionNotes.js
 const express = require('express');
 const router = express.Router();
-const { SessionNote, Client } = require('../models');
+const { SessionNote, Client, Alert } = require('../models');
 
 // GET all session notes
 router.get('/', async (req, res) => {
@@ -66,6 +66,25 @@ router.post('/', async (req, res) => {
       content: content || '',
       date: date || new Date()
     });
+    
+    // Check low mood threshold (<=3) configurable via env LOW_MOOD_THRESHOLD
+    const threshold = parseInt(process.env.LOW_MOOD_THRESHOLD || '3', 10);
+    if (mood !== null && mood <= threshold) {
+      // create alert if none unacknowledged for this client of type lowMood
+      const existing = await Alert.findOne({ where: { clientId, type: 'lowMood', acknowledged: false } });
+      if (!existing) {
+        const alertRecord = await Alert.create({
+          clientId,
+          type: 'lowMood',
+          message: `Low mood rating (${mood}/10) recorded`,
+          severity: 'critical',
+          sessionNoteId: newNote.id
+        });
+        // emit socket event
+        const io = req.app?.get('io');
+        if (io) io.emit('alert-new', alertRecord);
+      }
+    }
     
     res.status(201).json(newNote);
   } catch (error) {

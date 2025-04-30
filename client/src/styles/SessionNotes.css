@@ -126,6 +126,16 @@
   color: #2aa09b;
 }
 
+.mood-rating.mood-high {
+  color: #2ecc71;
+}
+.mood-rating.mood-medium {
+  color: #f1c40f;
+}
+.mood-rating.mood-low {
+  color: #e74c3c;
+}
+
 .note-content {
   margin-bottom: 10px;
   line-height: 1.4;

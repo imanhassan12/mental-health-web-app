@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const http = require('http');
+const socketIo = require('socket.io');
 require('dotenv').config();
 
 // Sequelize models
@@ -13,13 +15,20 @@ const { Practitioner, Client, Appointment, SessionNote, Goal } = db;
 const clientsRoute = require('./routes/clients');
 const sessionNotesRoute = require('./routes/sessionNotes');
 const goalsRoute = require('./routes/goals');
+const alertsRoute = require('./routes/alerts');
+const tasksRoute = require('./routes/tasks');
+const remindersRoute = require('./routes/reminders');
 
-const app = express();
+const expressApp = express();
+const server = http.createServer(expressApp);
+const io = socketIo(server, { cors: { origin: '*' } });
+expressApp.set('io', io);
+
 const port = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SECRET_KEY';
 
-app.use(cors());
-app.use(express.json());
+expressApp.use(cors());
+expressApp.use(express.json());
 
 // Helper function for hashing passwords with crypto
 function hashPassword(password) {
@@ -79,7 +88,7 @@ function verifyPassword(password, storedHash) {
 // ---------------------------------------------------------------------------
 // USER REGISTRATION (POST /api/register)
 // ---------------------------------------------------------------------------
-app.post('/api/register', async (req, res) => {
+expressApp.post('/api/register', async (req, res) => {
   const { firstName, lastName, username, password, email } = req.body;
   if (!firstName || !lastName || !username || !password || !email) {
     return res.status(400).json({ message: 'Please fill in all fields.' });
@@ -130,7 +139,7 @@ app.post('/api/register', async (req, res) => {
 // ---------------------------------------------------------------------------
 // USER LOGIN (POST /api/login)
 // ---------------------------------------------------------------------------
-app.post('/api/login', async (req, res) => {
+expressApp.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   
   try {
@@ -181,7 +190,7 @@ app.post('/api/login', async (req, res) => {
 // ---------------------------------------------------------------------------
 // BASIC CHECK-IN EXAMPLE (POST /api/checkin)
 // ---------------------------------------------------------------------------
-app.post('/api/checkin', async (req, res) => {
+expressApp.post('/api/checkin', async (req, res) => {
   const { clientId, mood, content } = req.body;
   
   if (!clientId || !mood) {
@@ -216,7 +225,7 @@ app.post('/api/checkin', async (req, res) => {
 // ---------------------------------------------------------------------------
 // APPOINTMENTS CRUD (SCHEDULING FEATURE)
 // ---------------------------------------------------------------------------
-app.get('/api/appointments', async (req, res) => {
+expressApp.get('/api/appointments', async (req, res) => {
   try {
     const appointments = await Appointment.findAll({
       include: [
@@ -232,7 +241,7 @@ app.get('/api/appointments', async (req, res) => {
 });
 
 // Get appointments by practitioner ID
-app.get('/api/appointments/practitioner/:practitionerId', async (req, res) => {
+expressApp.get('/api/appointments/practitioner/:practitionerId', async (req, res) => {
   const { practitionerId } = req.params;
   
   try {
@@ -253,7 +262,7 @@ app.get('/api/appointments/practitioner/:practitionerId', async (req, res) => {
 });
 
 // Get appointments by client ID
-app.get('/api/appointments/client/:clientId', async (req, res) => {
+expressApp.get('/api/appointments/client/:clientId', async (req, res) => {
   const { clientId } = req.params;
   
   try {
@@ -273,7 +282,7 @@ app.get('/api/appointments/client/:clientId', async (req, res) => {
   }
 });
 
-app.post('/api/appointments', async (req, res) => {
+expressApp.post('/api/appointments', async (req, res) => {
   const { clientId, practitionerId, startTime, endTime, status, title, notes } = req.body;
   
   if (!clientId || !practitionerId || !startTime) {
@@ -307,7 +316,7 @@ app.post('/api/appointments', async (req, res) => {
   }
 });
 
-app.put('/api/appointments/:id', async (req, res) => {
+expressApp.put('/api/appointments/:id', async (req, res) => {
   const { id } = req.params;
   const { clientId, practitionerId, startTime, endTime, status, title, notes } = req.body;
   
@@ -336,7 +345,7 @@ app.put('/api/appointments/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/appointments/:id', async (req, res) => {
+expressApp.delete('/api/appointments/:id', async (req, res) => {
   const { id } = req.params;
   
   try {
@@ -359,14 +368,17 @@ app.delete('/api/appointments/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Clients Route
 // ---------------------------------------------------------------------------
-app.use('/api/clients', clientsRoute);
-app.use('/api/session-notes', sessionNotesRoute);
-app.use('/api/goals', goalsRoute);
+expressApp.use('/api/clients', clientsRoute);
+expressApp.use('/api/session-notes', sessionNotesRoute);
+expressApp.use('/api/goals', goalsRoute);
+expressApp.use('/api/alerts', alertsRoute);
+expressApp.use('/api/tasks', tasksRoute);
+expressApp.use('/api/reminders', remindersRoute);
 
 // ---------------------------------------------------------------------------
 // DASHBOARD STATS
 // ---------------------------------------------------------------------------
-app.get('/api/dashboard-stats', async (req, res) => {
+expressApp.get('/api/dashboard-stats', async (req, res) => {
   try {
     // Count clients
     const clientCount = await Client.count();
@@ -436,6 +448,58 @@ app.get('/api/dashboard-stats', async (req, res) => {
       include: [{ model: Client, as: 'client' }]
     });
     
+    // Calculate risk alerts
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentLowMoodNotes = await SessionNote.findAll({
+      where: {
+        date: {
+          [db.Sequelize.Op.gte]: sevenDaysAgo
+        },
+        mood: {
+          [db.Sequelize.Op.lte]: 3
+        }
+      },
+      include: [{ model: Client, as: 'client' }],
+      order: [['date', 'DESC']]
+    });
+
+    // Ensure DB alerts exist and collect unacknowledged alerts
+    const dbAlerts = [];
+    for (const note of recentLowMoodNotes) {
+      if (!note.client) continue;
+      const existing = await db.Alert.findOne({ where: { clientId: note.client.id, type: 'lowMood', acknowledged: false } });
+      if (!existing) {
+        const created = await db.Alert.create({
+          clientId: note.client.id,
+          type: 'lowMood',
+          message: `Low mood rating (${note.mood}/10) recorded on ${new Date(note.date).toLocaleDateString()}`,
+          severity: 'critical',
+          sessionNoteId: note.id
+        });
+        dbAlerts.push(created);
+      } else {
+        dbAlerts.push(existing);
+      }
+    }
+
+    const alerts = await Promise.all(dbAlerts.map(async (a) => {
+      const cl = await Client.findByPk(a.clientId);
+      return {
+        id: a.id,
+        clientId: a.clientId,
+        clientName: cl ? cl.name : 'Unknown',
+        type: a.type,
+        message: a.message,
+        severity: a.severity,
+        acknowledged: a.acknowledged
+      };
+    }));
+    
+    // after inserting new alert record
+    if (io) io.emit('alert-new', alerts[alerts.length - 1]);
+    
     return res.json({
       activeClients: clientCount,
       avgMood,
@@ -443,7 +507,7 @@ app.get('/api/dashboard-stats', async (req, res) => {
       sessionNotesCount,
       recentAppointments,
       todaysAppointments: formattedTodaysAppointments,
-      alerts: [] // No alerts for now
+      alerts
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
@@ -454,7 +518,7 @@ app.get('/api/dashboard-stats', async (req, res) => {
 // ---------------------------------------------------------------------------
 // DASHBOARD CLIENTS
 // ---------------------------------------------------------------------------
-app.get('/api/dashboard-clients', async (req, res) => {
+expressApp.get('/api/dashboard-clients', async (req, res) => {
   try {
     // Get recent clients (latest 5)
     const clients = await Client.findAll({
@@ -491,7 +555,7 @@ app.get('/api/dashboard-clients', async (req, res) => {
 // ---------------------------------------------------------------------------
 // DASHBOARD NOTES
 // ---------------------------------------------------------------------------
-app.get('/api/dashboard-notes', async (req, res) => {
+expressApp.get('/api/dashboard-notes', async (req, res) => {
   try {
     // Get recent session notes (latest 5)
     const notes = await SessionNote.findAll({
@@ -521,7 +585,7 @@ app.get('/api/dashboard-notes', async (req, res) => {
 // ---------------------------------------------------------------------------
 // BASIC SERVER CHECK
 // ---------------------------------------------------------------------------
-app.get('/', (req, res) => {
+expressApp.get('/', (req, res) => {
   res.json({ message: 'Backend is running successfully!' });
 });
 
@@ -530,7 +594,7 @@ app.get('/', (req, res) => {
 // ---------------------------------------------------------------------------
 db.sequelize.sync()
   .then(() => {
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
   })

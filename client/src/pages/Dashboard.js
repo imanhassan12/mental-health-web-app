@@ -15,6 +15,9 @@ import {
 import '../styles/Dashboard.css';
 import api from '../services/api'; // Import the API service
 import FullCalendar from '../components/FullCalendar'; // Updated to use FullCalendar
+import { FaExclamationTriangle } from 'react-icons/fa';
+import { io } from 'socket.io-client';
+import AlertService from '../services/alert.service';
 
 // Register Chart.js components
 ChartJS.register(
@@ -36,6 +39,13 @@ const Dashboard = () => {
   const [recentNotes, setRecentNotes] = useState([]);
   const [todaysAppointments, setTodaysAppointments] = useState([]);
   const [todaysAppt, setTodaysAppt] = useState('--'); // For today's appointment count
+  const [showEscalate, setShowEscalate] = useState(false);
+  const [escalateAlert, setEscalateAlert] = useState(null);
+  const [escalateForm, setEscalateForm] = useState({ priority: 'high', dueDate: '', note: '' });
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyAlert, setHistoryAlert] = useState(null);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [escalateError, setEscalateError] = useState('');
 
   useEffect(() => {
     // Use the api service instead of direct fetch
@@ -60,10 +70,89 @@ const Dashboard = () => {
         setRecentClients(clientsData.recent || []);
         setRecentNotes(notesData.recent || []);
       })
+      .then(() => {
+        return AlertService.getAlerts(false).then(res => setAlerts(res.data));
+      })
       .catch(error => {
         console.error('Error fetching dashboard data:', error);
       });
   }, []);
+
+  useEffect(() => {
+    const socket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000');
+    const requestNotif = () => {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    };
+    requestNotif();
+    socket.on('alert-new', (alert) => {
+      setAlerts(prev => [alert, ...prev]);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Risk Alert', {
+          body: `${alert.clientName}: ${alert.message}`,
+          icon: '/favicon.ico'
+        });
+      }
+    });
+    socket.on('alert-updated', (alert) => {
+      setAlerts(prev => {
+        if (alert.acknowledged) {
+          return prev.filter(a => a.id !== alert.id);
+        }
+        return prev.map(a => (a.id === alert.id ? alert : a));
+      });
+    });
+    return () => socket.disconnect();
+  }, []);
+
+  const acknowledge = async (id) => {
+    await AlertService.acknowledgeAlert(id);
+  };
+
+  const openEscalate = (alert) => {
+    console.log('openEscalate called', alert);
+    setEscalateAlert(alert);
+    setEscalateForm({ priority: 'high', dueDate: '', note: '' });
+    setShowEscalate(true);
+  };
+
+  const closeEscalate = () => {
+    setShowEscalate(false);
+    setEscalateAlert(null);
+  };
+
+  const handleEscalateChange = (e) => {
+    setEscalateForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  };
+
+  const submitEscalate = async (e) => {
+    e.preventDefault();
+    if (!escalateForm.priority || !escalateForm.dueDate || !escalateForm.note.trim()) {
+      setEscalateError('All fields are required.');
+      return;
+    }
+    setEscalateError('');
+    try {
+      await AlertService.escalateAlert(escalateAlert.id, escalateForm);
+      closeEscalate();
+    } catch (err) {
+      setEscalateError('Failed to escalate alert. Please try again.');
+    }
+  };
+
+  const openHistory = async (alert) => {
+    setHistoryAlert(alert);
+    setShowHistory(true);
+    const res = await api.get(`/alerts/${alert.id}/history`);
+    setAuditLogs(res.data);
+  };
+
+  const closeHistory = () => {
+    setShowHistory(false);
+    setHistoryAlert(null);
+    setAuditLogs([]);
+  };
 
   // Prepare data for the overall mood trend chart
   const prepareMoodData = () => {
@@ -256,6 +345,34 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Alerts Section */}
+      {alerts.length > 0 && (
+        <div className="alerts-section">
+          <h3>Risk Alerts</h3>
+          <ul className="alerts-list">
+            {alerts.map((alert, idx) => (
+              <li key={idx} className={`alert-item alert-${alert.type}`}>  
+                <FaExclamationTriangle className="alert-icon" aria-label="Critical alert" />
+                <div className="alert-content">
+                  <Link to={`/clients/${alert.clientId}`} className="alert-link alert-client">
+                    {alert.clientName || 'Client'}
+                  </Link>
+                  <span className="alert-message">{alert.message}</span>
+                </div>
+                <span className="alert-badge critical">Critical</span>
+                {!alert.acknowledged && (
+                  <button className="ack-btn" onClick={() => acknowledge(alert.id)}>Acknowledge</button>
+                )}
+                {!alert.acknowledged && (
+                  <button className="escalate-btn" onClick={() => openEscalate(alert)}>Escalate</button>
+                )}
+                <button className="history-btn" onClick={() => openHistory(alert)} title="View History">🕑</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
       {/* Appointment Calendar - Full Width */}
       <div className="full-width-section">
         <div className="appointment-section">
@@ -301,6 +418,51 @@ const Dashboard = () => {
           <Link to="/clients" className="view-link">View All Clients</Link>
         </div>
       </div>
+
+      {showEscalate && (
+        <div className="modal-overlay" style={{zIndex: 2000, position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)'}}>
+          <div className="escalate-modal">
+            <h3>Escalate Alert</h3>
+            <form className="escalate-form" onSubmit={submitEscalate}>
+              {escalateError && <div className="escalate-error">{escalateError}</div>}
+              <label className="escalate-label">Priority:
+                <select className="escalate-input" name="priority" value={escalateForm.priority} onChange={handleEscalateChange}>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </label>
+              <label className="escalate-label">Due Date:
+                <input className="escalate-input" type="date" name="dueDate" value={escalateForm.dueDate} onChange={handleEscalateChange} />
+              </label>
+              <label className="escalate-label">Note:
+                <textarea className="escalate-input" name="note" value={escalateForm.note} onChange={handleEscalateChange} />
+              </label>
+              <div className="escalate-actions">
+                <button type="submit" className="escalate-btn">Submit</button>
+                <button type="button" onClick={closeEscalate} className="escalate-cancel-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showHistory && (
+        <div className="modal-overlay" style={{zIndex: 2000}}>
+          <div className="history-modal" style={{zIndex: 2100, background: '#fff', position: 'relative', minWidth: 320}}>
+            <h3>Alert History</h3>
+            <ul className="audit-timeline">
+              {auditLogs.length === 0 ? <li>No history found.</li> : auditLogs.map(log => (
+                <li key={log.id}>
+                  <span className="audit-action">{log.action}</span> by <span className="audit-actor">{log.actorId || 'System'}</span> <span className="audit-date">{new Date(log.createdAt).toLocaleString()}</span>
+                  {log.note && <div className="audit-note">{log.note}</div>}
+                </li>
+              ))}
+            </ul>
+            <button onClick={closeHistory} style={{marginTop:'1rem'}}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

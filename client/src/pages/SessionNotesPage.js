@@ -155,6 +155,13 @@ const SessionNotesPage = () => {
     return client ? client.name : 'Unknown Client';
   };
 
+  const getMoodClass = (value) => {
+    if (value === null || value === undefined) return '';
+    if (value >= 7) return 'mood-high';
+    if (value >= 4) return 'mood-medium';
+    return 'mood-low';
+  };
+
   if (loading) {
     return <div className="loading">Loading data...</div>;
   }
@@ -247,7 +254,7 @@ const SessionNotesPage = () => {
                       <span className="note-client">{getClientName(note.clientId)}</span>
                       <span className="note-date">{new Date(note.date).toLocaleDateString()}</span>
                     </div>
-                    <div className="note-mood">Mood: <span className="mood-rating">{note.mood}/10</span></div>
+                    <div className="note-mood">Mood: <span className={`mood-rating ${getMoodClass(note.mood)}`}>{note.mood}/10</span></div>
                     <div className="note-content">{note.content}</div>
                     <Link to={`/clients/${note.clientId}`} className="view-client-link">
                       View Client
