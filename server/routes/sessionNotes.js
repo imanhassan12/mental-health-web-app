@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { SessionNote, Client, Alert } = require('../models');
 const auditLog = require('../utils/auditLogger');
+const { analyzeNote } = require('../services/noteNlpAgent');
 
 // GET all session notes
 router.get('/', async (req, res) => {
@@ -124,6 +125,19 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting session note:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// NLP analysis for a session note
+router.post('/:id/nlp', async (req, res) => {
+  try {
+    const note = await SessionNote.findByPk(req.params.id);
+    if (!note) return res.status(404).json({ message: 'Session note not found' });
+    const nlpResult = await analyzeNote(note.content);
+    res.json(nlpResult);
+  } catch (error) {
+    console.error('Error analyzing session note NLP:', error);
+    res.status(500).json({ message: 'Error analyzing session note', error: error.message });
   }
 });
 

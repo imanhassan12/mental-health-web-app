@@ -22,6 +22,8 @@ const remindersRoute = require('./routes/reminders');
 const analyticsRoute = require('./routes/analytics');
 const messagesRoute = require('./routes/messages');
 const practitionersRoute = require('./routes/practitioners');
+const translationRoute = require('./routes/translation');
+const videoRoute = require('./routes/video');
 
 const expressApp = express();
 const server = http.createServer(expressApp);
@@ -273,6 +275,9 @@ expressApp.use('/api/analytics', analyticsRoute);
 expressApp.use('/api/messages', messagesRoute);
 expressApp.use('/api/appointments', require('./routes/appointments'));
 expressApp.use('/api/practitioners', practitionersRoute);
+expressApp.use('/api/translate', translationRoute);
+expressApp.use('/api/video', videoRoute);
+
 // ---------------------------------------------------------------------------
 // DASHBOARD STATS
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ const path = require('path');
 const { Consent } = require('../models');
 const jwt = require('jsonwebtoken');
 const { Practitioner } = require('../models');
+const db = require('../models');
 
 // Minimal requireAuth middleware (any authenticated user)
 async function requireAuth(req, res, next) {
@@ -51,6 +52,34 @@ router.get('/consent/me', requireAuth, async (req, res) => {
   if (!req.user) return res.status(401).json({ message: 'Not authenticated' });
   const consent = await Consent.findOne({ where: { userId: req.user.id }, order: [['timestamp', 'DESC']] });
   res.json(consent);
+});
+
+// Get current user's preferred language
+router.get('/me/language', async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+    const user = await db.Practitioner.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ preferredLanguage: user.preferredLanguage || 'en' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to get preferred language', error: error.message });
+  }
+});
+
+// Set current user's preferred language
+router.post('/me/language', async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+    const { preferredLanguage } = req.body;
+    if (!preferredLanguage) return res.status(400).json({ message: 'preferredLanguage is required' });
+    const user = await db.Practitioner.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    user.preferredLanguage = preferredLanguage;
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to set preferred language', error: error.message });
+  }
 });
 
 module.exports = router; 

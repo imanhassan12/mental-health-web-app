@@ -49,6 +49,16 @@ const ClientService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Get AI-powered risk prediction for a client
+  getClientRisk: async (id) => {
+    try {
+      const response = await api.get(`/clients/${id}/risk`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 

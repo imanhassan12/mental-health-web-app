@@ -5,6 +5,7 @@ import AppointmentService from '../services/appointment.service';
 import ClientService from '../services/client.service';
 import AuthService from '../services/auth.service';
 import '../styles/AppointmentsPage.css';
+import { FaVideo } from 'react-icons/fa';
 
 const AppointmentsPage = () => {
   const location = useLocation();
@@ -31,6 +32,9 @@ const AppointmentsPage = () => {
   // References for focus-trapping
   const modalRef = useRef(null);
   const firstFieldRef = useRef(null);
+
+  // Video loading state
+  const [videoLoading, setVideoLoading] = useState({});
 
   // Fetch all appointments and clients
   useEffect(() => {
@@ -211,6 +215,23 @@ const AppointmentsPage = () => {
     }
   };
 
+  const handleStartVideo = async (appointmentId) => {
+    setVideoLoading(prev => ({ ...prev, [appointmentId]: true }));
+    try {
+      const res = await fetch(`/api/video/meeting-link?appointmentId=${appointmentId}`);
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.open(data.url, '_blank', 'noopener');
+      } else {
+        alert('Failed to get video session link.');
+      }
+    } catch (err) {
+      alert('Failed to get video session link.');
+    } finally {
+      setVideoLoading(prev => ({ ...prev, [appointmentId]: false }));
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading appointments...</div>;
   }
@@ -268,6 +289,16 @@ const AppointmentsPage = () => {
                 <td>
                   <button className="btn edit-btn" onClick={() => openForm(appt)}>Edit</button>
                   <button className="btn delete-btn" onClick={() => handleDelete(appt.id)}>Delete</button>
+                  <button
+                    className="btn small"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => handleStartVideo(appt.id)}
+                    disabled={videoLoading[appt.id]}
+                    title="Start/Join Video Session"
+                  >
+                    <FaVideo style={{ marginRight: 4 }} />
+                    {videoLoading[appt.id] ? 'Loading...' : 'Video Session'}
+                  </button>
                 </td>
               </tr>
             ))}

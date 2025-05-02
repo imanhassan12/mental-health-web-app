@@ -29,4 +29,17 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// POST /api/tasks - create a new task
+router.post('/', async (req, res) => {
+  try {
+    const task = await EscalationTask.create(req.body);
+    const io = req.app.get('io');
+    if (io) io.emit('task-created', task);
+    return res.status(201).json(task);
+  } catch (error) {
+    console.error('Error creating task:', error);
+    return res.status(500).json({ message: 'Failed to create task', error: error.message });
+  }
+});
+
 module.exports = router; 

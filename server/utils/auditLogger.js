@@ -1,10 +1,14 @@
 const { AuditLog } = require('../models');
 
 module.exports = async function auditLog({ req, action, entity, entityId, details }) {
+  if (!req.user) {
+    console.warn('Audit log skipped: req.user is missing');
+    return;
+  }
   try {
     await AuditLog.create({
-      userId: req.user?.id || null,
-      userRole: req.user?.role || null,
+      userId: req.user.id,
+      userRole: req.user.role,
       action,
       entity,
       entityId,

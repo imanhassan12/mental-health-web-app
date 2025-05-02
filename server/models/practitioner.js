@@ -59,7 +59,11 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         isIn: [['admin', 'practitioner', 'viewer']]
       }
-    }
+    },
+    preferredLanguage: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     sequelize,
     modelName: 'Practitioner',

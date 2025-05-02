@@ -59,6 +59,16 @@ const SessionNoteService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Analyze a session note for NLP insights
+  analyzeSessionNote: async (id) => {
+    try {
+      const response = await api.post(`/session-notes/${id}/nlp`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 

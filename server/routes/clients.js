@@ -6,6 +6,7 @@ const { Parser } = require('json2csv');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 const auditLog = require('../utils/auditLogger');
+const { getRiskPrediction } = require('../services/riskAgent');
 
 // Middleware to require a specific role
 function requireRole(...roles) {
@@ -323,6 +324,27 @@ router.get('/:id/export/fhir', requireRole('admin', 'practitioner'), async (req,
     res.json(fhir);
   } catch (err) {
     res.status(500).json({ message: 'Error exporting client as FHIR', error: err.message });
+  }
+});
+
+// Get AI-powered risk prediction for a client
+router.get('/:id/risk', async (req, res) => {
+  try {
+    const db = require('../models');
+    const client = await db.Client.findByPk(req.params.id, {
+      include: [
+        { model: db.SessionNote, as: 'sessionNotes', order: [['date', 'DESC']], limit: 5 },
+        { model: db.Appointment, as: 'appointments', order: [['startTime', 'DESC']], limit: 10 }
+      ]
+    });
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+    const sessionNotes = client.sessionNotes || [];
+    const moodRatings = sessionNotes.map(n => n.mood);
+    const appointments = client.appointments || [];
+    const riskResult = await getRiskPrediction({ sessionNotes, moodRatings, appointments });
+    res.json(riskResult);
+  } catch (err) {
+    res.status(500).json({ message: 'Error generating risk prediction', error: err.message });
   }
 });
 

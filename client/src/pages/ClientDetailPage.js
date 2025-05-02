@@ -6,6 +6,8 @@ import SessionNoteService from '../services/sessionNote.service';
 import AppointmentService from '../services/appointment.service';
 import AuthService from '../services/auth.service';
 import '../styles/ClientDetailPage.css';
+import { FaVideo } from 'react-icons/fa';
+import Modal from 'react-modal';
 
 const ClientDetailPage = () => {
   const { clientId } = useParams();
@@ -15,6 +17,13 @@ const ClientDetailPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [risk, setRisk] = useState(null);
+  const [riskLoading, setRiskLoading] = useState(true);
+  const [riskError, setRiskError] = useState(null);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoLoading, setVideoLoading] = useState(false);
+  const now = new Date();
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -46,6 +55,22 @@ const ClientDetailPage = () => {
     fetchClientData();
   }, [clientId]);
 
+  useEffect(() => {
+    const fetchRisk = async () => {
+      setRiskLoading(true);
+      setRiskError(null);
+      try {
+        const riskData = await ClientService.getClientRisk(clientId);
+        setRisk(riskData);
+      } catch (err) {
+        setRiskError('Could not fetch risk prediction.');
+      } finally {
+        setRiskLoading(false);
+      }
+    };
+    fetchRisk();
+  }, [clientId]);
+
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this client? This action cannot be undone.')) {
       try {
@@ -74,6 +99,34 @@ const ClientDetailPage = () => {
       link.remove();
     } catch (err) {
       alert('Export failed: ' + err.message);
+    }
+  };
+
+  const getEligibleAppointment = () => {
+    return appointments.find(appt => {
+      const start = new Date(appt.startTime);
+      return (start.getTime() - now.getTime() < 15 * 60 * 1000) && (now.getTime() - start.getTime() < 60 * 60 * 1000);
+    });
+  };
+
+  const eligibleAppt = getEligibleAppointment();
+
+  const handleStartVideo = async () => {
+    if (!eligibleAppt) return;
+    setVideoLoading(true);
+    try {
+      const res = await fetch(`/api/video/meeting-link?appointmentId=${eligibleAppt.id}`);
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setVideoUrl(data.url);
+        setVideoModalOpen(true);
+      } else {
+        alert('Failed to get video session link.');
+      }
+    } catch (err) {
+      alert('Failed to get video session link.');
+    } finally {
+      setVideoLoading(false);
     }
   };
 
@@ -130,6 +183,25 @@ const ClientDetailPage = () => {
           </button>
           <span style={{ fontSize: 14, color: '#888', marginLeft: 6 }} title="EHR/EMR Export: Download this client's record for use in other healthcare systems.">ℹ️</span>
         </div>
+      </div>
+
+      {/* AI-Powered Risk Prediction Section */}
+      <div className="risk-section" style={{ margin: '18px 0', padding: '12px', background: '#f8f9fa', borderRadius: 8, border: '1px solid #e0e0e0' }}>
+        <h4 style={{ margin: 0, marginBottom: 6 }}>AI-Powered Risk Prediction</h4>
+        {riskLoading ? (
+          <span style={{ color: '#888' }}>Loading risk prediction...</span>
+        ) : riskError ? (
+          <span style={{ color: 'red' }}>{riskError}</span>
+        ) : risk ? (
+          <div>
+            <span style={{ fontWeight: 600, color: risk.risk === 'High' ? '#d32f2f' : risk.risk === 'Medium' ? '#fbc02d' : '#388e3c' }}>
+              Risk Level: {risk.risk}
+            </span>
+            <div style={{ fontSize: 14, color: '#444', marginTop: 4 }}>
+              {risk.factors}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="client-info">
@@ -191,6 +263,38 @@ const ClientDetailPage = () => {
           </ul>
         )}
       </div>
+
+      {eligibleAppt && (
+        <button
+          className="btn small"
+          style={{ marginTop: 12 }}
+          onClick={handleStartVideo}
+          disabled={videoLoading}
+          title="Start/Join Video Session"
+        >
+          <FaVideo style={{ marginRight: 4 }} />
+          {videoLoading ? 'Loading...' : 'Video Session'}
+        </button>
+      )}
+
+      <Modal
+        isOpen={videoModalOpen}
+        onRequestClose={() => setVideoModalOpen(false)}
+        contentLabel="Video Session"
+        style={{ content: { width: '90vw', height: '80vh', margin: 'auto', padding: 0 } }}
+      >
+        <button onClick={() => setVideoModalOpen(false)} style={{ position: 'absolute', top: 8, right: 12, zIndex: 2 }}>Close</button>
+        {videoUrl ? (
+          <iframe
+            src={videoUrl}
+            title="Jitsi Video Session"
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            allow="camera; microphone; fullscreen; display-capture"
+          />
+        ) : (
+          <div style={{ textAlign: 'center', marginTop: 40 }}>Loading video session...</div>
+        )}
+      </Modal>
     </div>
   );
 };
