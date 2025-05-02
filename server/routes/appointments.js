@@ -4,9 +4,10 @@ const router = express.Router();
 const db = require('../models');
 const { Appointment, Client, Practitioner } = db;
 const auditLog = require('../utils/auditLogger');
+const { requireAuth } = require('./practitioners');
 
 // GET all appointments
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   try {
     const appointments = await Appointment.findAll({
       include: [
@@ -22,7 +23,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET single appointment
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAuth, async (req, res) => {
   try {
     const appointment = await Appointment.findByPk(req.params.id);
     if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
@@ -34,7 +35,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // CREATE an appointment
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   const { clientId, practitionerId, startTime, endTime, status, title, notes } = req.body;
   if (!clientId || !practitionerId || !startTime) {
     return res.status(400).json({ message: 'Missing required fields.' });
@@ -62,7 +63,7 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE an appointment
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { clientId, practitionerId, startTime, endTime, status, title, notes } = req.body;
   try {
@@ -87,7 +88,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE an appointment
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   try {
     const appointment = await Appointment.findByPk(id);
@@ -103,7 +104,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET appointments by practitioner
-router.get('/practitioner/:practitionerId', async (req, res) => {
+router.get('/practitioner/:practitionerId', requireAuth, async (req, res) => {
   const { practitionerId } = req.params;
   try {
     const appointments = await Appointment.findAll({
@@ -121,7 +122,7 @@ router.get('/practitioner/:practitionerId', async (req, res) => {
 });
 
 // GET appointments by client
-router.get('/client/:clientId', async (req, res) => {
+router.get('/client/:clientId', requireAuth, async (req, res) => {
   const { clientId } = req.params;
   try {
     const appointments = await Appointment.findAll({
@@ -139,7 +140,7 @@ router.get('/client/:clientId', async (req, res) => {
 });
 
 // --- SMART SCHEDULING ENDPOINT ---
-router.get('/schedule/suggest', async (req, res) => {
+router.get('/schedule/suggest', requireAuth, async (req, res) => {
   const { clientId, assigneeId, duration, limit } = req.query;
   if (!clientId || !assigneeId) return res.status(400).json({ message: 'clientId and assigneeId required' });
   const slotDuration = Number(duration) || 60; // in minutes
@@ -186,7 +187,7 @@ router.get('/schedule/suggest', async (req, res) => {
 });
 
 // --- BUSY SLOTS ENDPOINT ---
-router.get('/schedule/busy', async (req, res) => {
+router.get('/schedule/busy', requireAuth, async (req, res) => {
   const { clientId, assigneeId } = req.query;
   if (!clientId || !assigneeId) return res.status(400).json({ message: 'clientId and assigneeId required' });
   const now = new Date();

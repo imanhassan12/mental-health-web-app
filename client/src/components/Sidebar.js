@@ -61,7 +61,7 @@ const Sidebar = () => {
 
         {/* Analytics with icon */}
         <NavLink to="/analytics" className={getActiveLinkClass}>
-          <span role="img" aria-label="Analytics">📊</span> Analytics
+          <span role="img" aria-label="Analytics">📊</span> Engagement Analytics
         </NavLink>
 
         {/* Messaging with icon */}

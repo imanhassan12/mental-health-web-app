@@ -82,4 +82,5 @@ router.post('/me/language', async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;
+module.exports.requireAuth = requireAuth; 

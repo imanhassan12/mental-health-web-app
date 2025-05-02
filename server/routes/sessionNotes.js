@@ -4,9 +4,10 @@ const router = express.Router();
 const { SessionNote, Client, Alert } = require('../models');
 const auditLog = require('../utils/auditLogger');
 const { analyzeNote } = require('../services/noteNlpAgent');
+const { requireAuth } = require('./practitioners');
 
 // GET all session notes
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   try {
     const notes = await SessionNote.findAll({
       include: [{ model: Client, as: 'client' }]
@@ -20,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET session notes for a specific client
-router.get('/client/:clientId', async (req, res) => {
+router.get('/client/:clientId', requireAuth, async (req, res) => {
   try {
     const notes = await SessionNote.findAll({
       where: { clientId: req.params.clientId },
@@ -35,7 +36,7 @@ router.get('/client/:clientId', async (req, res) => {
 });
 
 // GET single session note
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAuth, async (req, res) => {
   try {
     const note = await SessionNote.findByPk(req.params.id, {
       include: [{ model: Client, as: 'client' }]
@@ -50,7 +51,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // CREATE new session note
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   const { clientId, mood, content, date } = req.body;
   
   if (!clientId) {
@@ -99,7 +100,7 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE session note
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const note = await SessionNote.findByPk(req.params.id);
     if (!note) return res.status(404).json({ message: 'Session note not found' });
@@ -114,7 +115,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE session note
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const note = await SessionNote.findByPk(req.params.id);
     if (!note) return res.status(404).json({ message: 'Session note not found' });
@@ -129,7 +130,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // NLP analysis for a session note
-router.post('/:id/nlp', async (req, res) => {
+router.post('/:id/nlp', requireAuth, async (req, res) => {
   try {
     const note = await SessionNote.findByPk(req.params.id);
     if (!note) return res.status(404).json({ message: 'Session note not found' });

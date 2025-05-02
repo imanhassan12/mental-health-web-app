@@ -6,6 +6,7 @@ import ClientService from '../services/client.service';
 import AuthService from '../services/auth.service';
 import '../styles/AppointmentsPage.css';
 import { FaVideo } from 'react-icons/fa';
+import api from '../services/api';
 
 const AppointmentsPage = () => {
   const location = useLocation();
@@ -218,10 +219,9 @@ const AppointmentsPage = () => {
   const handleStartVideo = async (appointmentId) => {
     setVideoLoading(prev => ({ ...prev, [appointmentId]: true }));
     try {
-      const res = await fetch(`/api/video/meeting-link?appointmentId=${appointmentId}`);
-      const data = await res.json();
-      if (res.ok && data.url) {
-        window.open(data.url, '_blank', 'noopener');
+      const res = await api.get('/video/meeting-link', { params: { appointmentId } });
+      if (res.data && res.data.url) {
+        window.open(res.data.url, '_blank', 'noopener');
       } else {
         alert('Failed to get video session link.');
       }

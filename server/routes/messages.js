@@ -23,6 +23,7 @@ function getUserFromReq(req) {
 // POST /api/messages/thread - Create a thread
 router.post('/thread', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   let { participantIds, clientId } = req.body;
   try {
@@ -43,6 +44,7 @@ router.post('/thread', async (req, res) => {
 // POST /api/messages - Send a message (encrypt content)
 router.post('/', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   const { threadId, clientId, content } = req.body;
   if (!threadId || !content) return res.status(400).json({ message: 'threadId and content required' });
@@ -74,6 +76,7 @@ router.post('/', async (req, res) => {
 // GET /api/messages/threads - List threads for user (only participant)
 router.get('/threads', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   try {
     // Find thread IDs where user is a participant
@@ -102,6 +105,7 @@ router.get('/threads', async (req, res) => {
 // GET /api/messages/thread/:id - List messages in a thread (only if participant)
 router.get('/thread/:id', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   const { id } = req.params;
   try {
@@ -136,6 +140,7 @@ router.get('/thread/:id', async (req, res) => {
 // GET /api/messages/audit-log - Export access logs (admin only, MVP: allow all)
 router.get('/audit-log', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   try {
     const logs = await db.MessageAccessLog.findAll({
@@ -192,6 +197,7 @@ router.get('/practitioners', async (req, res) => {
 // POST /api/messages/thread/:id/participants - Add participants to a thread
 router.post('/thread/:id/participants', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   const { id } = req.params;
   const { participantIds } = req.body;
@@ -246,6 +252,7 @@ router.delete('/thread/:id/participants/:practitionerId', async (req, res) => {
 // POST /api/messages/:messageId/read - Mark a message as read by the current user
 router.post('/:messageId/read', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   const { messageId } = req.params;
   try {
@@ -288,6 +295,7 @@ router.post('/:messageId/read', async (req, res) => {
 // GET /api/messages/:messageId/readers - Get all users who have read a message
 router.get('/:messageId/readers', async (req, res) => {
   const user = getUserFromReq(req);
+  req.user = user;
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
   const { messageId } = req.params;
   try {

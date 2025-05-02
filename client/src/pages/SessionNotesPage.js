@@ -5,7 +5,7 @@ import SessionNoteService from '../services/sessionNote.service';
 import ClientService from '../services/client.service';
 import '../styles/SessionNotes.css';
 import { FaLightbulb, FaTags, FaTasks, FaSmile, FaList, FaGlobe, FaSync, FaInfoCircle } from 'react-icons/fa';
-
+import api from '../services/api';
 const languageOptions = [
   { code: 'en', label: 'English' },
   { code: 'es', label: 'Spanish' },
@@ -210,14 +210,15 @@ const SessionNotesPage = () => {
   const handleTranslate = async (noteId, text) => {
     setTranslation(prev => ({ ...prev, [noteId]: { loading: true, error: null, text: '', showingTranslated: true } }));
     try {
-      const res = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, targetLang })
+      const res = await api.post('/translate', {
+        text,
+        targetLang
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Translation failed');
-      setTranslation(prev => ({ ...prev, [noteId]: { loading: false, error: null, text: data.translatedText, showingTranslated: true } }));
+      if (res.data && res.data.translatedText) {
+        setTranslation(prev => ({ ...prev, [noteId]: { loading: false, error: null, text: res.data.translatedText, showingTranslated: true } }));
+      } else {
+        setTranslation(prev => ({ ...prev, [noteId]: { loading: false, error: 'Translation failed', text: '', showingTranslated: false } }));
+      }
     } catch (err) {
       setTranslation(prev => ({ ...prev, [noteId]: { loading: false, error: err.message, text: '', showingTranslated: false } }));
     }

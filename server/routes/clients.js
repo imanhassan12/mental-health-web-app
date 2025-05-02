@@ -48,7 +48,7 @@ function requireRole(...roles) {
 }
 
 // GET all clients
-router.get('/', async (req, res) => {
+router.get('/', requireRole('admin', 'practitioner'), async (req, res) => {
   try {
     const clients = await Client.findAll();
     await auditLog({ req, action: 'VIEW_CLIENT_LIST', entity: 'Client', entityId: null, details: { count: clients.length } });
@@ -148,7 +148,7 @@ router.get('/audit-logs/csv', requireRole('admin'), async (req, res) => {
 });
 
 // GET single client
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireRole('admin', 'practitioner'), async (req, res) => {
   try {
     const client = await Client.findByPk(req.params.id);
     if (!client) return res.status(404).json({ message: 'Client not found' });
@@ -161,7 +161,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // CREATE new client
-router.post('/', async (req, res) => {
+router.post('/', requireRole('admin', 'practitioner'), async (req, res) => {
   const { name, phone, notes } = req.body;
   if (!name) {
     return res.status(400).json({ message: 'Name is required' });
@@ -182,7 +182,7 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE client
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireRole('admin', 'practitioner'), async (req, res) => {
   try {
     const client = await Client.findByPk(req.params.id);
     if (!client) return res.status(404).json({ message: 'Client not found' });
@@ -197,7 +197,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE client
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('admin', 'practitioner'), async (req, res) => {
   try {
     const client = await Client.findByPk(req.params.id);
     if (!client) return res.status(404).json({ message: 'Client not found' });
@@ -328,7 +328,7 @@ router.get('/:id/export/fhir', requireRole('admin', 'practitioner'), async (req,
 });
 
 // Get AI-powered risk prediction for a client
-router.get('/:id/risk', async (req, res) => {
+router.get('/:id/risk', requireRole('admin', 'practitioner'), async (req, res) => {
   try {
     const db = require('../models');
     const client = await db.Client.findByPk(req.params.id, {
