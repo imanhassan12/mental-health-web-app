@@ -7,6 +7,8 @@ import Sidebar from './Sidebar';
 import '../styles/Layout.css';
 
 const Layout = () => {
+  console.log('Layout mounted');
+
   return (
     <div className="app-container">
       {/* Top Header (could be teal, etc.) */}

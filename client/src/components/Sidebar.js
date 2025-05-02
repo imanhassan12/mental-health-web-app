@@ -1,7 +1,7 @@
 // client/src/components/Sidebar.js
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaUsers, FaClipboardList, FaBook, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
+import { FaHome, FaUsers, FaClipboardList, FaBook, FaCalendarAlt, FaChartLine, FaComments } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 import { Link } from 'react-router-dom';
 
@@ -57,6 +57,17 @@ const Sidebar = () => {
         {/* Reminders with icon */}
         <NavLink to="/reminders" className={getActiveLinkClass}>
           <span role="img" aria-label="Reminders">🔔</span> Reminders
+        </NavLink>
+
+        {/* Analytics with icon */}
+        <NavLink to="/analytics" className={getActiveLinkClass}>
+          <span role="img" aria-label="Analytics">📊</span> Analytics
+        </NavLink>
+
+        {/* Messaging with icon */}
+        <NavLink to="/messaging" className={getActiveLinkClass}>
+          <FaComments className="sidebar__icon" />
+          <span>Messaging</span>
         </NavLink>
       </nav>
     </aside>

@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import ClientService from '../services/client.service';
 import SessionNoteService from '../services/sessionNote.service';
 import AppointmentService from '../services/appointment.service';
+import AuthService from '../services/auth.service';
 import '../styles/ClientDetailPage.css';
 
 const ClientDetailPage = () => {
@@ -57,6 +58,25 @@ const ClientDetailPage = () => {
     }
   };
 
+  const downloadFile = async (url, filename) => {
+    const token = AuthService.getToken();
+    try {
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Export failed: ' + err.message);
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading client data...</div>;
   }
@@ -87,10 +107,34 @@ const ClientDetailPage = () => {
           <Link to={`/clients/${clientId}/edit`} className="btn primary">Edit Client</Link>
           <button onClick={handleDelete} className="btn danger">Delete Client</button>
         </div>
+        <div className="ehr-export-buttons" style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            className="btn small"
+            title="Export client data as CSV for use in other systems."
+            onClick={() => {
+              const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+              downloadFile(`${backendUrl}/api/clients/${clientId}/export/csv`, `client-${clientId}.csv`);
+            }}
+          >
+            Export CSV
+          </button>
+          <button
+            className="btn small"
+            title="Export client data as FHIR (Fast Healthcare Interoperability Resources) JSON."
+            onClick={() => {
+              const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+              downloadFile(`${backendUrl}/api/clients/${clientId}/export/fhir`, `client-${clientId}.json`);
+            }}
+          >
+            Export FHIR JSON
+          </button>
+          <span style={{ fontSize: 14, color: '#888', marginLeft: 6 }} title="EHR/EMR Export: Download this client's record for use in other healthcare systems.">ℹ️</span>
+        </div>
       </div>
 
       <div className="client-info">
         <p><strong>Phone:</strong> {client.phone}</p>
+        <p><strong>Diagnosis:</strong> {client.diagnosis || 'Unknown'}</p>
         <p><strong>Notes:</strong> {client.notes}</p>
       </div>
 

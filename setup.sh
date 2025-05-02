@@ -83,7 +83,7 @@ JWT_SECRET=$(openssl rand -hex 32)
 JWT_EXPIRES_IN=24h
 
 # Frontend Configuration
-REACT_APP_API_URL=http://localhost:4000
+REACT_APP_API_URL=http://backend:4000
 
 # Docker Configuration (used by docker-compose)
 MYSQL_ROOT_PASSWORD=rootpassword
@@ -119,7 +119,7 @@ echo -e "${GREEN}Setup complete!${NC}"
 echo -e "Your Mental Health Practitioner Aide application is now running."
 echo
 echo -e "Access the application at: ${BLUE}http://localhost:3000${NC}"
-echo -e "Backend API is available at: ${BLUE}http://localhost:4000${NC}"
+echo -e "Backend API is available at: ${BLUE}http://backend:4000${NC}"
 echo -e "PhpMyAdmin is available at: ${BLUE}http://localhost:8080${NC}"
 echo
 echo -e "${YELLOW}Demo Login Credentials:${NC}"

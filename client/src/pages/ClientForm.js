@@ -11,6 +11,7 @@ const ClientForm = ({ isEdit }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
+  const [diagnosis, setDiagnosis] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -23,6 +24,7 @@ const ClientForm = ({ isEdit }) => {
           setName(client.name);
           setPhone(client.phone || '');
           setNotes(client.notes || '');
+          setDiagnosis(client.diagnosis || '');
           setError(null);
         } catch (err) {
           console.error('Error fetching client:', err);
@@ -38,7 +40,7 @@ const ClientForm = ({ isEdit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { name, phone, notes };
+    const payload = { name, phone, notes, diagnosis };
 
     try {
       setLoading(true);
@@ -104,6 +106,17 @@ const ClientForm = ({ isEdit }) => {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             disabled={loading}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="diagnosis">Diagnosis</label>
+          <input
+            id="diagnosis"
+            type="text"
+            value={diagnosis}
+            onChange={(e) => setDiagnosis(e.target.value)}
+            disabled={loading}
+            placeholder="e.g. Depression, Anxiety"
           />
         </div>
         <div className="form-group">

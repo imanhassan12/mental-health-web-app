@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const http = require('http');
 const socketIo = require('socket.io');
 require('dotenv').config();
+const auditLog = require('./utils/auditLogger');
 
 // Sequelize models
 const db = require('./models');
@@ -18,6 +19,9 @@ const goalsRoute = require('./routes/goals');
 const alertsRoute = require('./routes/alerts');
 const tasksRoute = require('./routes/tasks');
 const remindersRoute = require('./routes/reminders');
+const analyticsRoute = require('./routes/analytics');
+const messagesRoute = require('./routes/messages');
+const practitionersRoute = require('./routes/practitioners');
 
 const expressApp = express();
 const server = http.createServer(expressApp);
@@ -29,6 +33,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SECRET_KEY';
 
 expressApp.use(cors());
 expressApp.use(express.json());
+
+// Brute-force protection: track failed login attempts in memory
+const loginAttempts = {};
+const MAX_ATTEMPTS = 5;
+const WINDOW_MINUTES = 15;
+const LOCKOUT_MINUTES = 15;
 
 // Helper function for hashing passwords with crypto
 function hashPassword(password) {
@@ -113,6 +123,8 @@ expressApp.post('/api/register', async (req, res) => {
       email
     });
     
+    await auditLog({ req, action: 'REGISTER', entity: 'Practitioner', entityId: newUser.id, details: { username, email } });
+    
     // Generate JWT token
     const token = jwt.sign(
       { id: newUser.id, username: newUser.username },
@@ -127,7 +139,8 @@ expressApp.post('/api/register', async (req, res) => {
         id: newUser.id,
         username: newUser.username,
         name: newUser.name,
-        email: newUser.email
+        email: newUser.email,
+        role: newUser.role
       },
     });
   } catch (error) {
@@ -141,12 +154,28 @@ expressApp.post('/api/register', async (req, res) => {
 // ---------------------------------------------------------------------------
 expressApp.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  
+  const now = Date.now();
+  // Initialize or clean up old attempts
+  if (!loginAttempts[username]) {
+    loginAttempts[username] = { attempts: [], lockedUntil: null };
+  } else {
+    // Remove attempts older than WINDOW_MINUTES
+    loginAttempts[username].attempts = loginAttempts[username].attempts.filter(ts => now - ts < WINDOW_MINUTES * 60 * 1000);
+  }
+  // Check lockout
+  if (loginAttempts[username].lockedUntil && now < loginAttempts[username].lockedUntil) {
+    const minutesLeft = Math.ceil((loginAttempts[username].lockedUntil - now) / 60000);
+    return res.status(429).json({ message: `Account locked due to too many failed login attempts. Try again in ${minutesLeft} minute(s).` });
+  }
   try {
     // Find user by username
     const user = await Practitioner.findOne({ where: { username } });
     if (!user) {
-      console.log(`Login failed: User '${username}' not found`);
+      loginAttempts[username].attempts.push(now);
+      if (loginAttempts[username].attempts.length >= MAX_ATTEMPTS) {
+        loginAttempts[username].lockedUntil = now + LOCKOUT_MINUTES * 60 * 1000;
+      }
+      await auditLog({ req, action: 'LOGIN_FAILED', entity: 'Practitioner', entityId: null, details: { username, reason: 'User not found' } });
       return res.status(401).json({ message: 'Incorrect username or password.' });
     }
     
@@ -158,9 +187,16 @@ expressApp.post('/api/login', async (req, res) => {
     console.log(`Password verification result: ${isMatch ? 'SUCCESS' : 'FAILED'}`);
     
     if (!isMatch) {
-      console.log(`Login failed: Invalid password for user '${username}'`);
+      loginAttempts[username].attempts.push(now);
+      if (loginAttempts[username].attempts.length >= MAX_ATTEMPTS) {
+        loginAttempts[username].lockedUntil = now + LOCKOUT_MINUTES * 60 * 1000;
+      }
+      await auditLog({ req, action: 'LOGIN_FAILED', entity: 'Practitioner', entityId: user.id, details: { username, reason: 'Invalid password' } });
       return res.status(401).json({ message: 'Incorrect username or password.' });
     }
+    
+    // On success, reset attempts
+    loginAttempts[username] = { attempts: [], lockedUntil: null };
     
     // Generate JWT token
     const token = jwt.sign(
@@ -169,7 +205,7 @@ expressApp.post('/api/login', async (req, res) => {
       { expiresIn: '1h' }
     );
     
-    console.log(`Login successful for user: ${username}`);
+    await auditLog({ req, action: 'LOGIN_SUCCESS', entity: 'Practitioner', entityId: user.id, details: { username } });
     
     return res.status(200).json({
       message: 'Logged in successfully.',
@@ -178,11 +214,13 @@ expressApp.post('/api/login', async (req, res) => {
         id: user.id,
         username: user.username,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       },
     });
   } catch (error) {
     console.error('Error during login:', error);
+    await auditLog({ req, action: 'LOGIN_ERROR', entity: 'Practitioner', entityId: null, details: { username, error: error.message } });
     return res.status(500).json({ message: 'Internal server error.' });
   }
 });
@@ -223,149 +261,6 @@ expressApp.post('/api/checkin', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// APPOINTMENTS CRUD (SCHEDULING FEATURE)
-// ---------------------------------------------------------------------------
-expressApp.get('/api/appointments', async (req, res) => {
-  try {
-    const appointments = await Appointment.findAll({
-      include: [
-        { model: Client, as: 'client' },
-        { model: Practitioner, as: 'practitioner' }
-      ]
-    });
-    return res.json(appointments);
-  } catch (error) {
-    console.error('Error fetching appointments:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-});
-
-// Get appointments by practitioner ID
-expressApp.get('/api/appointments/practitioner/:practitionerId', async (req, res) => {
-  const { practitionerId } = req.params;
-  
-  try {
-    const appointments = await Appointment.findAll({
-      where: { practitionerId },
-      include: [
-        { model: Client, as: 'client' },
-        { model: Practitioner, as: 'practitioner' }
-      ],
-      order: [['startTime', 'ASC']]
-    });
-    
-    return res.json(appointments);
-  } catch (error) {
-    console.error(`Error fetching appointments for practitioner ${practitionerId}:`, error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-});
-
-// Get appointments by client ID
-expressApp.get('/api/appointments/client/:clientId', async (req, res) => {
-  const { clientId } = req.params;
-  
-  try {
-    const appointments = await Appointment.findAll({
-      where: { clientId },
-      include: [
-        { model: Client, as: 'client' },
-        { model: Practitioner, as: 'practitioner' }
-      ],
-      order: [['startTime', 'ASC']]
-    });
-    
-    return res.json(appointments);
-  } catch (error) {
-    console.error(`Error fetching appointments for client ${clientId}:`, error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-});
-
-expressApp.post('/api/appointments', async (req, res) => {
-  const { clientId, practitionerId, startTime, endTime, status, title, notes } = req.body;
-  
-  if (!clientId || !practitionerId || !startTime) {
-    return res.status(400).json({ message: 'Missing required fields.' });
-  }
-  
-  try {
-    // Check if client and practitioner exist
-    const client = await Client.findByPk(clientId);
-    const practitioner = await Practitioner.findByPk(practitionerId);
-    
-    if (!client || !practitioner) {
-      return res.status(404).json({ message: 'Client or practitioner not found.' });
-    }
-    
-    // Create appointment
-    const appointment = await Appointment.create({
-      clientId,
-      practitionerId,
-      startTime,
-      endTime: endTime || null,
-      status: status || 'scheduled',
-      title: title || 'Session',
-      notes: notes || ''
-    });
-    
-    return res.status(201).json(appointment);
-  } catch (error) {
-    console.error('Error creating appointment:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-});
-
-expressApp.put('/api/appointments/:id', async (req, res) => {
-  const { id } = req.params;
-  const { clientId, practitionerId, startTime, endTime, status, title, notes } = req.body;
-  
-  try {
-    // Find appointment
-    const appointment = await Appointment.findByPk(id);
-    if (!appointment) {
-      return res.status(404).json({ message: 'Appointment not found.' });
-    }
-    
-    // Update appointment
-    await appointment.update({
-      clientId: clientId || appointment.clientId,
-      practitionerId: practitionerId || appointment.practitionerId,
-      startTime: startTime || appointment.startTime,
-      endTime: endTime || appointment.endTime,
-      status: status || appointment.status,
-      title: title || appointment.title,
-      notes: notes || appointment.notes
-    });
-    
-    return res.json(appointment);
-  } catch (error) {
-    console.error('Error updating appointment:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-});
-
-expressApp.delete('/api/appointments/:id', async (req, res) => {
-  const { id } = req.params;
-  
-  try {
-    // Find appointment
-    const appointment = await Appointment.findByPk(id);
-    if (!appointment) {
-      return res.status(404).json({ message: 'Appointment not found.' });
-    }
-    
-    // Delete appointment
-    await appointment.destroy();
-    
-    return res.json({ message: 'Appointment deleted.' });
-  } catch (error) {
-    console.error('Error deleting appointment:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-});
-
-// ---------------------------------------------------------------------------
 // Clients Route
 // ---------------------------------------------------------------------------
 expressApp.use('/api/clients', clientsRoute);
@@ -374,7 +269,10 @@ expressApp.use('/api/goals', goalsRoute);
 expressApp.use('/api/alerts', alertsRoute);
 expressApp.use('/api/tasks', tasksRoute);
 expressApp.use('/api/reminders', remindersRoute);
-
+expressApp.use('/api/analytics', analyticsRoute);
+expressApp.use('/api/messages', messagesRoute);
+expressApp.use('/api/appointments', require('./routes/appointments'));
+expressApp.use('/api/practitioners', practitionersRoute);
 // ---------------------------------------------------------------------------
 // DASHBOARD STATS
 // ---------------------------------------------------------------------------
@@ -601,3 +499,26 @@ db.sequelize.sync()
   .catch(err => {
     console.error('Failed to sync database:', err);
   });
+
+io.on('connection', (socket) => {
+  console.log('Socket.io: client connected', socket.id);
+  // Join user room
+  socket.on('join', ({ userId }) => {
+    if (userId) {
+      socket.join(userId);
+      console.log(`[Socket.io] User ${userId} joined their room (socket ${socket.id})`);
+    }
+  });
+  // Relay typing event to all other participants
+  socket.on('typing', ({ threadId, userId, name }) => {
+    if (!threadId || !userId) return;
+    db.ThreadParticipant.findAll({ where: { threadId } }).then(participants => {
+      participants.forEach(tp => {
+        if (tp.practitionerId !== userId) {
+          console.log(`[SOCKET] Emitting 'typing' to practitionerId:`, tp.practitionerId, 'for threadId:', threadId, 'from userId:', userId, 'name:', name);
+          io.to(tp.practitionerId).emit('typing', { threadId, userId, name });
+        }
+      });
+    });
+  });
+});

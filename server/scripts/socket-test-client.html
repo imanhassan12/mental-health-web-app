@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.io Test</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  </head>
+  <body>
+    <script>
+      const socket = io('http://localhost:4000', { transports: ['websocket', 'polling'] });
+      socket.on('connect', () => {
+        console.log('Connected:', socket.id);
+        socket.emit('ping', 'Hello from browser!');
+      });
+      socket.on('pong', (msg) => {
+        alert('Received pong: ' + msg);
+      });
+      socket.on('disconnect', () => {
+        console.log('Disconnected');
+      });
+    </script>
+    <h1>Socket.io Test</h1>
+  </body>
+</html> 

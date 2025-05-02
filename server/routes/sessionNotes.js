@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { SessionNote, Client, Alert } = require('../models');
+const auditLog = require('../utils/auditLogger');
 
 // GET all session notes
 router.get('/', async (req, res) => {
@@ -9,6 +10,7 @@ router.get('/', async (req, res) => {
     const notes = await SessionNote.findAll({
       include: [{ model: Client, as: 'client' }]
     });
+    await auditLog({ req, action: 'VIEW_SESSION_NOTE_LIST', entity: 'SessionNote', entityId: null, details: { count: notes.length } });
     res.json(notes);
   } catch (error) {
     console.error('Error fetching session notes:', error);
@@ -38,6 +40,7 @@ router.get('/:id', async (req, res) => {
       include: [{ model: Client, as: 'client' }]
     });
     if (!note) return res.status(404).json({ message: 'Session note not found' });
+    await auditLog({ req, action: 'VIEW_SESSION_NOTE', entity: 'SessionNote', entityId: note.id, details: {} });
     res.json(note);
   } catch (error) {
     console.error('Error fetching session note:', error);
@@ -86,6 +89,7 @@ router.post('/', async (req, res) => {
       }
     }
     
+    await auditLog({ req, action: 'CREATE_SESSION_NOTE', entity: 'SessionNote', entityId: newNote.id, details: req.body });
     res.status(201).json(newNote);
   } catch (error) {
     console.error('Error creating session note:', error);
@@ -100,6 +104,7 @@ router.put('/:id', async (req, res) => {
     if (!note) return res.status(404).json({ message: 'Session note not found' });
     
     await note.update(req.body);
+    await auditLog({ req, action: 'UPDATE_SESSION_NOTE', entity: 'SessionNote', entityId: note.id, details: req.body });
     res.json(note);
   } catch (error) {
     console.error('Error updating session note:', error);
@@ -114,6 +119,7 @@ router.delete('/:id', async (req, res) => {
     if (!note) return res.status(404).json({ message: 'Session note not found' });
     
     await note.destroy();
+    await auditLog({ req, action: 'DELETE_SESSION_NOTE', entity: 'SessionNote', entityId: note.id, details: {} });
     res.json({ message: 'Session note deleted' });
   } catch (error) {
     console.error('Error deleting session note:', error);

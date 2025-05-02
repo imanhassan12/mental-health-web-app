@@ -191,6 +191,58 @@ const fullDemoSetup = async () => {
       // Continue; not fatal
     }
 
+    // -------------------------------------------------------------------
+    // Step 4.5: Assign demo diagnoses to clients for analytics
+    // -------------------------------------------------------------------
+    try {
+      console.log('🔄 Assigning demo diagnoses to clients...');
+      // Define some demo diagnoses
+      const demoDiagnoses = ['Depression', 'Anxiety', 'Bipolar Disorder', 'PTSD', 'OCD', 'Unknown'];
+      // Fetch all clients (or limit to a reasonable number for demo)
+      const allClients = await db.Client.findAll();
+      for (let i = 0; i < allClients.length; i++) {
+        const diagnosis = demoDiagnoses[i % demoDiagnoses.length];
+        await allClients[i].update({ diagnosis });
+        console.log(`  - ${allClients[i].name}: ${diagnosis}`);
+      }
+      console.log('✅ Demo diagnoses assigned to clients.');
+    } catch (diagnosisErr) {
+      console.error('⚠️ Could not assign demo diagnoses:', diagnosisErr.message);
+      // Continue; not fatal
+    }
+
+    // --- PATCH: Add createdAt/updatedAt columns and fix userId type ---
+    try {
+      console.log('🔄 Patching DB schema for createdAt/updatedAt columns and userId type...');
+      // AuditLogs table
+      try {
+        await sequelize.query(`ALTER TABLE AuditLogs ADD COLUMN createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;`);
+      } catch (err) {
+        if (!/Duplicate column name/.test(err.message)) throw err;
+      }
+      try {
+        await sequelize.query(`ALTER TABLE AuditLogs ADD COLUMN updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;`);
+      } catch (err) {
+        if (!/Duplicate column name/.test(err.message)) throw err;
+      }
+      // Consents table
+      try {
+        await sequelize.query(`ALTER TABLE Consents ADD COLUMN createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;`);
+      } catch (err) {
+        if (!/Duplicate column name/.test(err.message)) throw err;
+      }
+      try {
+        await sequelize.query(`ALTER TABLE Consents ADD COLUMN updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;`);
+      } catch (err) {
+        if (!/Duplicate column name/.test(err.message)) throw err;
+      }
+      await sequelize.query(`ALTER TABLE Consents MODIFY COLUMN userId CHAR(36) NOT NULL;`);
+      console.log('✅ DB schema patch complete.');
+    } catch (patchErr) {
+      console.error('❌ DB schema patch failed:', patchErr.message);
+    }
+    // --- END PATCH ---
+
     console.log('\n🎉 Full database setup with demo data completed successfully!');
     console.log('\nYou can now start the server with: npm run dev');
     console.log('Login credentials:');

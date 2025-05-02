@@ -77,6 +77,8 @@ services:
         npm run db:demo-setup &&
         echo 'Updating demo passwords...' &&
         npm run update-passwords &&
+        echo 'Running seeders...' &&
+        npx sequelize-cli db:seed:all &&
         echo 'Starting server...' &&
         npm run dev
       "

@@ -28,3 +28,28 @@ body, html, #root {
 * {
   transition: all 0.3s ease;
 }
+
+.privacy-modal-overlay {
+  position: fixed;
+  z-index: 3000;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.privacy-modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 600px;
+  min-width: 320px;
+  width: 90%;
+  z-index: 3100;
+  position: relative;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+}

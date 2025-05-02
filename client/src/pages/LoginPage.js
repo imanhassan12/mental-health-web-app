@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AuthService from '../services/auth.service';
 import '../styles/LoginPage.css';
 
-const LoginPage = () => {
+const LoginPage = ({ setCurrentUser }) => {
   // For navigation after login
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,25 +42,39 @@ const LoginPage = () => {
     try {
       await AuthService.login(loginUsername, loginPassword);
       setLoginMessage('Logged in successfully!');
-      
+      if (setCurrentUser) setCurrentUser(AuthService.getCurrentUser());
       // Use React Router's navigate for better SPA navigation
       // Redirect to the page they were trying to access or the dashboard
       navigate(from, { replace: true });
     } catch (error) {
       console.error('Error during login:', error);
-      setLoginMessage(
-        error.response?.data?.message || 'Incorrect username or password.'
-      );
+      if (error.response?.status === 429) {
+        setLoginMessage(error.response.data?.message || 'Account temporarily locked due to too many failed login attempts. Please try again later.');
+      } else {
+        setLoginMessage(
+          error.response?.data?.message || 'Incorrect username or password.'
+        );
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Password strength check function
+  function checkPasswordStrength(pwd) {
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    return strongPasswordRegex.test(pwd);
+  }
 
   // Handle Create Account submission
   const handleCreateAccount = async (e) => {
     e.preventDefault();
     if (!firstName || !lastName || !newUsername || !newPassword) {
       setCreateAccountMessage('Please fill in all fields.');
+      return;
+    }
+    if (!checkPasswordStrength(newPassword)) {
+      setCreateAccountMessage('Password does not meet requirements.');
       return;
     }
     setIsLoading(true);
@@ -196,6 +210,9 @@ const LoginPage = () => {
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={isLoading}
               />
+              <div style={{ fontSize: '0.9em', color: checkPasswordStrength(newPassword) || !newPassword ? '#888' : 'red', marginTop: 4 }}>
+                Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+              </div>
             </div>
 
             {/* Error/Success Message */}

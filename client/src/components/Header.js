@@ -31,6 +31,9 @@ const Header = () => {
             <div className="header__user">
               <FaUser className="header__user-icon" />
               <span className="header__username">{currentUser.name}</span>
+              <span style={{ marginLeft: 8, color: '#888', fontSize: 13 }}>
+                ({currentUser.role})
+              </span>
             </div>
             <button onClick={handleLogout} className="header__logout">
               <FaSignOutAlt className="header__logout-icon" />

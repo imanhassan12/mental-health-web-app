@@ -37,6 +37,15 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
+const FieldPreference = require('./fieldpreference')(sequelize, Sequelize.DataTypes);
+db.FieldPreference = FieldPreference;
+
+db.Practitioner.hasMany(FieldPreference, { foreignKey: 'practitionerId', as: 'fieldPreferences' });
+FieldPreference.belongsTo(db.Practitioner, { foreignKey: 'practitionerId', as: 'practitioner' });
+
+const Consent = require('./consent')(sequelize);
+db.Consent = Consent;
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

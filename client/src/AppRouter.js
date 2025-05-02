@@ -16,7 +16,13 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AuthService from './services/auth.service';
 import TasksPage from './pages/TasksPage';
 import RemindersPage from './pages/RemindersPage';
-const AppRouter = () => {
+import AnalyticsPage from './pages/AnalyticsPage';
+import MessagingPage from './pages/MessagingPage';
+import TestPage from './pages/TestPage';
+
+console.log('AppRouter mounted');
+
+const AppRouter = ({ setCurrentUser }) => {
   const [isReady, setIsReady] = useState(false);
 
   // Verify auth token on initial load
@@ -46,7 +52,7 @@ const AppRouter = () => {
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage setCurrentUser={setCurrentUser} />} />
 
         {/* Protected routes wrapped in Layout */}
         <Route element={<Layout />}>
@@ -64,7 +70,7 @@ const AppRouter = () => {
           <Route 
             path="/clients" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={['admin', 'practitioner']}>
                 <ClientsPage />
               </ProtectedRoute>
             } 
@@ -72,7 +78,7 @@ const AppRouter = () => {
           <Route 
             path="/clients/new" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={['admin', 'practitioner']}>
                 <ClientForm isEdit={false} />
               </ProtectedRoute>
             } 
@@ -80,7 +86,7 @@ const AppRouter = () => {
           <Route 
             path="/clients/:clientId" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={['admin', 'practitioner']}>
                 <ClientDetailPage />
               </ProtectedRoute>
             } 
@@ -88,7 +94,7 @@ const AppRouter = () => {
           <Route 
             path="/clients/:clientId/edit" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRoles={['admin', 'practitioner']}>
                 <ClientForm isEdit={true} />
               </ProtectedRoute>
             } 
@@ -162,6 +168,32 @@ const AppRouter = () => {
             }
           />
           
+          {/* Analytics */}
+          <Route 
+            path="/analytics" 
+            element={
+              <ProtectedRoute>
+                <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Messaging */}
+          <Route 
+            path="/messaging" 
+            element={
+              <ProtectedRoute>
+                <MessagingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Test Page for remount debugging */}
+          <Route 
+            path="/test" 
+            element={<TestPage />} 
+          />
+
           {/* Catch all - redirect to Dashboard */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

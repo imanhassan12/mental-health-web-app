@@ -7,7 +7,7 @@ module.exports = {
     database: process.env.DB_NAME || 'mental_health_db',
     host: process.env.DB_HOST || 'mysql',
     dialect: process.env.DB_DIALECT || 'mysql',
-    logging: console.log,
+    logging: false,
     dialectOptions: {
       ssl: false
     }

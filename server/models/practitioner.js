@@ -15,6 +15,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'practitionerId',
         as: 'appointments'
       });
+      Practitioner.hasMany(models.Message, {
+        foreignKey: 'senderId',
+        as: 'sentMessages'
+      });
+      Practitioner.hasMany(models.MessageAccessLog, {
+        foreignKey: 'userId',
+        as: 'messageAccessLogs'
+      });
     }
   }
   Practitioner.init({
@@ -42,6 +50,14 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       validate: {
         isEmail: true
+      }
+    },
+    role: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'practitioner',
+      validate: {
+        isIn: [['admin', 'practitioner', 'viewer']]
       }
     }
   }, {

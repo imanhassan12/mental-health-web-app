@@ -38,4 +38,9 @@ api.interceptors.response.use(
   }
 );
 
+// If you have any hardcoded endpoints for schedule, update them:
+// Example (if using axios):
+// api.get('/appointments/schedule/suggest', ...)
+// api.get('/appointments/schedule/busy', ...)
+
 export default api; 

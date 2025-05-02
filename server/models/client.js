@@ -25,6 +25,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'clientId',
         as: 'goals'
       });
+      Client.hasMany(models.Thread, {
+        foreignKey: 'clientId',
+        as: 'threads'
+      });
+      Client.hasMany(models.Message, {
+        foreignKey: 'clientId',
+        as: 'messages'
+      });
     }
   }
   Client.init({
@@ -43,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     notes: {
       type: DataTypes.TEXT,
+      allowNull: true
+    },
+    diagnosis: {
+      type: DataTypes.STRING,
       allowNull: true
     }
   }, {
