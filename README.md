@@ -210,3 +210,12 @@ The frontend will be running at http://localhost:3000.
 ## License
 
 ISC
+
+Before you run Docker commands like:
+
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+**Make sure you have created and filled in both your root `.env` and `server/.env` files with the correct values (database credentials, JWT secret, API keys, etc.).**  If these files are missing or incomplete, the containers will fail to start properly.
