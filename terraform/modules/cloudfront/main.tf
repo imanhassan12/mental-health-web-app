@@ -12,6 +12,7 @@ resource "aws_cloudfront_distribution" "main" {
   comment             = "${var.project}-${var.environment}-frontend"
   aliases             = [var.domain_alias]
   web_acl_id          = var.web_acl_id
+  default_root_object = "index.html"
 
   origin {
     domain_name              = var.s3_bucket_domain_name
@@ -44,6 +45,19 @@ resource "aws_cloudfront_distribution" "main" {
     geo_restriction {
       restriction_type = "none"
     }
+  }
+
+  # Add custom error responses to fallback to index.html for SPA routing
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+  }
+
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
   }
 
   tags = {

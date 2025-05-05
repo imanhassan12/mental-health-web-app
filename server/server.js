@@ -10,12 +10,42 @@ const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client
 
 const expressApp = express();
 const server = http.createServer(expressApp);
-const io = socketIo(server, { cors: { origin: '*' } });
+const io = socketIo(server, { cors: { origin: [ 'http://localhost:3000', 'https://app.mentalhealthaide.com' ], methods: ["GET", "POST"], credentials: true } });
 expressApp.set('io', io);
 
 const port = process.env.PORT || 4000;
 
-expressApp.use(cors());
+const allowedOrigins = [
+  'https://app.mentalhealthaide.com',
+  'http://localhost:3000',
+  // add dev or staging UI URLs if needed
+];
+
+expressApp.use(
+  cors({
+    origin: (origin, cb) => {
+      // allow Postman / curl with no origin
+      if (!origin) return cb(null, true);
+      return allowedOrigins.includes(origin)
+        ? cb(null, true)
+        : cb(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With', 
+      'Origin',
+      'X-CSRF-Token',
+    ],
+    exposedHeaders: ['Content-Disposition'],
+    optionsSuccessStatus: 204,
+  })
+);
+
+// **MUST** be after the cors() call
+expressApp.options('*', cors());
 expressApp.use(express.json());
 
 // Brute-force protection: track failed login attempts in memory
@@ -106,11 +136,12 @@ async function loadSecretsFromAWS() {
         secretsCache[key] = await getSecret(arn);
       } catch (err) {
         console.error(`Failed to fetch secret for ${key}:`, err);
-        secretsCache[key] = undefined;
+        secretsCache[key] = process.env[key];
       }
     }
   }
 }
+
 
 // ---------------------------------------------------------------------------
 // SYNC DATABASE AND START SERVER
@@ -145,7 +176,6 @@ async function loadSecretsFromAWS() {
   // ---------------------------------------------------------------------------
   // USER REGISTRATION (POST /api/register)
   // ---------------------------------------------------------------------------
-  if (process.env.NODE_ENV !== 'production') {
     expressApp.post('/api/register', async (req, res) => {
       const { firstName, lastName, username, password, email } = req.body;
       if (!firstName || !lastName || !username || !password || !email) {
@@ -176,7 +206,7 @@ async function loadSecretsFromAWS() {
         // Generate JWT token
         const token = jwt.sign(
           { id: newUser.id, username: newUser.username },
-          secretsCache.JWT_SECRET,
+          process.env.JWT_SECRET,
           { expiresIn: '1h' }
         );
         
@@ -196,12 +226,10 @@ async function loadSecretsFromAWS() {
         return res.status(500).json({ message: 'Internal server error.' });
       }
     });
-  }
 
   // ---------------------------------------------------------------------------
   // USER LOGIN (POST /api/login)
   // ---------------------------------------------------------------------------
-  if (process.env.NODE_ENV !== 'production') {
     expressApp.post('/api/login', async (req, res) => {
       const { username, password } = req.body;
       const now = Date.now();
@@ -251,7 +279,7 @@ async function loadSecretsFromAWS() {
         // Generate JWT token
         const token = jwt.sign(
           { id: user.id, username: user.username },
-          secretsCache.JWT_SECRET,
+          process.env.JWT_SECRET,
           { expiresIn: '1h' }
         );
         
@@ -274,7 +302,6 @@ async function loadSecretsFromAWS() {
         return res.status(500).json({ message: 'Internal server error.' });
       }
     });
-  }
 
   // ---------------------------------------------------------------------------
   // BASIC CHECK-IN EXAMPLE (POST /api/checkin)

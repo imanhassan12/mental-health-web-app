@@ -9,8 +9,13 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     // 'newSocket' is used for immediate operations; 'socket' is provided via context for the rest of the app
-    const newSocket = io('http://localhost:4000', {
-      transports: ['websocket', 'polling']
+    const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:4000', {
+        transports: ["polling", "websocket"], // polling first, then WS
+        withCredentials: true,                // send sticky cookie
+        transportOptions: {
+          polling: { withCredentials: true }  // include cookie on each poll
+        },
+        auth: { token: localStorage.getItem("token") } // optional JWT
     });
     setSocket(newSocket);
     newSocket.on('connect', () => {

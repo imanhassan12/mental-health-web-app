@@ -4,8 +4,15 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_security_group" "ecs" {
   name        = "${var.project}-${var.environment}-ecs-sg"
-  description = "Allow only ALB to reach ECS tasks"
+  description = "Allow inbound traffic from ALB on 4000"
   vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = 4000
+    to_port         = 4000
+    protocol        = "tcp"
+    security_groups = [var.alb_sg_id]
+  }
 
   egress {
     from_port   = 0

@@ -39,12 +39,12 @@ const AuthService = {
   },
 
   isAuthenticated: () => {
-    if (isProd) return true; // trust ALB cookie
+    // if (isProd) return true; // trust ALB cookie
     return !!localStorage.getItem('token');
   },
 
   getToken: () => {
-    if (isProd) return null;
+    // if (isProd) return null;
     return localStorage.getItem('token');
   },
 

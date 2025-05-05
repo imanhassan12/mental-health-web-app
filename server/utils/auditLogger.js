@@ -1,6 +1,7 @@
 const { AuditLog } = require('../models');
 
 module.exports = async function auditLog({ req, action, entity, entityId, details }) {
+  console.log('auditLog', req, action, entity, entityId, details);
   if (!req.user) {
     console.warn('Audit log skipped: req.user is missing');
     return;

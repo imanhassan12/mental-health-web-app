@@ -72,4 +72,9 @@ variable "log_group_name" {
 variable "aws_region" {
   description = "AWS region (needed for awslogs)."
   type        = string
+}
+
+variable "alb_sg_id" {
+  description = "The security group ID of the ALB to allow traffic from."
+  type        = string
 } 

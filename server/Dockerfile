@@ -14,8 +14,12 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose the API port
 EXPOSE 4000
 
-# Command to run the application
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["npm", "run", "dev"]

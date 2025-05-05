@@ -3,7 +3,11 @@ variable "environment" { type = string }
 variable "vpc_id" { type = string }
 variable "public_subnet_ids" { type = list(string) }
 variable "certificate_arn" { type = string }
-variable "ecs_sg_id" { type = string }
+variable "ecs_sg_id" {
+  description = "(Deprecated) The ECS security group ID. Not used, but required for compatibility."
+  type        = string
+  default     = null
+}
 variable "alb_listener_port" {
   type    = number
   default = 443

@@ -26,6 +26,7 @@ module "iam" {
   project     = var.project
   environment = var.environment
   aws_region  = var.aws_region
+  kms_key_id  = module.kms.kms_key_arn
 }
 
 module "secrets" {
@@ -72,6 +73,7 @@ module "ecs" {
   }
   target_group_arn = module.alb.target_group_arn
   aws_region        = var.aws_region
+  alb_sg_id         = module.alb.alb_sg_id
 }
 
 module "ecr" {
@@ -163,7 +165,6 @@ module "alb" {
   vpc_id              = module.vpc.vpc_id
   public_subnet_ids   = module.vpc.public_subnet_ids
   certificate_arn     = var.alb_certificate_arn
-  ecs_sg_id           = module.ecs.ecs_security_group_id
   container_port      = 4000
   oidc_enabled        = true
   oidc_client_id      = module.cognito.user_pool_client_id

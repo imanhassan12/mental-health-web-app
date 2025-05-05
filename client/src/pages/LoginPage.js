@@ -38,15 +38,15 @@ const LoginPage = ({ setCurrentUser }) => {
   }, [navigate]);
 
   // In production, we rely on Cognito Hosted UI
-  useEffect(() => {
-    if (isProd) {
-      const domain = process.env.REACT_APP_COGNITO_DOMAIN;
-      const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
-      if (!domain || !clientId) return; // fallback if env not set
-      const redirect = encodeURIComponent(window.location.origin + '/auth/callback');
-      window.location.href = `https://${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${redirect}`;
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (isProd) {
+  //     const domain = process.env.REACT_APP_COGNITO_DOMAIN;
+  //     const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
+  //     if (!domain || !clientId) return; // fallback if env not set
+  //     const redirect = encodeURIComponent(window.location.origin + '/auth/callback');
+  //     window.location.href = `https://${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${redirect}`;
+  //   }
+  // }, []);
 
   // Handle Login submission
   const handleLogin = async (e) => {

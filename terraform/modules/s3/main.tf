@@ -30,6 +30,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
   }
 }
 
+resource "aws_s3_bucket_website_configuration" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  index_document {
+    suffix = "index.html"
+  }
+}
+
 output "bucket_name" {
   value = aws_s3_bucket.main.bucket
 }

@@ -1,8 +1,28 @@
+resource "aws_security_group" "alb" {
+  name        = "${var.project}-${var.environment}-alb-sg"
+  description = "Allow inbound HTTPS from the internet"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_lb" "main" {
   name               = "${var.project}-${var.environment}-alb"
   load_balancer_type = "application"
   subnets            = var.public_subnet_ids
-  security_groups    = [var.ecs_sg_id]
+  security_groups    = [aws_security_group.alb.id]
 }
 
 resource "aws_lb_target_group" "ecs" {
@@ -45,6 +65,22 @@ resource "aws_lb_listener" "https" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.ecs.arn
+  }
+}
+
+resource "aws_lb_listener_rule" "allow_options" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 1
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs.arn
+  }
+
+  condition {
+    http_request_method {
+      values = ["OPTIONS"]
+    }
   }
 }
 

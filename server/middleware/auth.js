@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken');
 const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = function auth(req, res, next) {
-  if (isProd) {
-    // Trust ALB / Cognito headers in production
-    const cognitoSub = req.headers['x-amzn-oidc-identity'];
-    if (!cognitoSub) return res.sendStatus(401);
-    req.user = { sub: cognitoSub };
-    return next();
-  }
+  // if (isProd) {
+  //   // Trust ALB / Cognito headers in production
+  //   const cognitoSub = req.headers['x-amzn-oidc-identity'];
+  //   if (!cognitoSub) return res.sendStatus(401);
+  //   req.user = { sub: cognitoSub };
+  //   return next();
+  // }
 
   // Development: validate JWT from Authorization header
   const authHeader = req.headers.authorization;

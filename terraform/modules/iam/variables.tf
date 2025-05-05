@@ -11,4 +11,9 @@ variable "environment" {
 variable "aws_region" {
   description = "AWS region to deploy resources in."
   type        = string
+}
+
+variable "kms_key_id" {
+  description = "KMS key ARN for decrypting secrets in ECS tasks"
+  type        = string
 } 
