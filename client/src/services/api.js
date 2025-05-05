@@ -43,4 +43,8 @@ api.interceptors.response.use(
 // api.get('/appointments/schedule/suggest', ...)
 // api.get('/appointments/schedule/busy', ...)
 
+export const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+// update baseURL accordingly
+api.defaults.baseURL = backendUrl + '/api';
+
 export default api; 

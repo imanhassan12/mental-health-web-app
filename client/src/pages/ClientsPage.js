@@ -5,6 +5,7 @@ import ClientService from '../services/client.service';
 import '../styles/ClientsPage.css';
 import AuthService from '../services/auth.service';
 import api from '../services/api';
+import { backendUrl } from '../services/api';
 
 const ClientsPage = () => {
   const [clients, setClients] = useState([]);
@@ -95,8 +96,8 @@ const ClientsPage = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
-      const res = await fetch(`${backendUrl}/api/clients/import/${type}`, {
+      const urlBase = backendUrl;
+      const res = await fetch(`${urlBase}/api/clients/import/${type}`, {
         method: 'POST',
         body: formData
       });
@@ -165,7 +166,8 @@ const ClientsPage = () => {
     if (auditEnd) url += `end=${encodeURIComponent(auditEnd)}&`;
     if (auditAction) url += `action=${encodeURIComponent(auditAction)}&`;
     const token = AuthService.getToken();
-    const res = await fetch(process.env.REACT_APP_BACKEND_URL + url, { headers: { Authorization: `Bearer ${token}` } });
+    const urlBase = backendUrl;
+    const res = await fetch(urlBase + url, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) return alert('Export failed');
     const blob = await res.blob();
     const link = document.createElement('a');

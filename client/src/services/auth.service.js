@@ -1,5 +1,7 @@
 import api from './api';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const AuthService = {
   login: async (username, password) => {
     try {
@@ -37,10 +39,12 @@ const AuthService = {
   },
 
   isAuthenticated: () => {
+    if (isProd) return true; // trust ALB cookie
     return !!localStorage.getItem('token');
   },
 
   getToken: () => {
+    if (isProd) return null;
     return localStorage.getItem('token');
   },
 

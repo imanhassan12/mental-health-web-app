@@ -7,7 +7,6 @@ import Dashboard from './pages/Dashboard';
 import ClientsPage from './pages/ClientsPage';
 import ClientForm from './pages/ClientForm';
 import SessionNotesPage from './pages/SessionNotesPage';
-import ResourcesPage from './pages/ResourcesPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import LoginPage from './pages/LoginPage';
 import ClientDetailPage from './pages/ClientDetailPage';
@@ -19,6 +18,7 @@ import RemindersPage from './pages/RemindersPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import MessagingPage from './pages/MessagingPage';
 import TestPage from './pages/TestPage';
+import AuthCallback from './pages/AuthCallback';
 
 console.log('AppRouter mounted');
 
@@ -118,16 +118,6 @@ const AppRouter = ({ setCurrentUser }) => {
             } 
           />
 
-          {/* Resources */}
-          <Route 
-            path="/resources" 
-            element={
-              <ProtectedRoute>
-                <ResourcesPage />
-              </ProtectedRoute>
-            } 
-          />
-
           {/* Appointments */}
           <Route 
             path="/appointments" 
@@ -193,6 +183,9 @@ const AppRouter = ({ setCurrentUser }) => {
             path="/test" 
             element={<TestPage />} 
           />
+
+          {/* Auth Callback */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Catch all - redirect to Dashboard */}
           <Route path="*" element={<Navigate to="/" replace />} />

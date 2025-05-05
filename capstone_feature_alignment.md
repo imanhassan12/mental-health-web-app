@@ -187,6 +187,11 @@ Enable practitioners and admins to export and import client data for interoperab
 | SEC-06  | User          | to request a copy or deletion of my personal data     | • Users can request data export or deletion (GDPR/CCPA).<br>• Requests are logged and processed by admin. |
 | SEC-07  | Admin         | to restrict access based on user roles and permissions| • Only authorized users can access sensitive features (e.g., export, audit logs, admin settings).<br>• Unauthorized access attempts are logged. |
 | SEC-09  | Admin         | to configure data retention and deletion policies     | • Can set retention periods for audit logs and user data.<br>• System automatically deletes data after the retention period. |
+| WAF-01   | Sec Ops | to block common web exploits automatically so that we reduce the risk of XSS, command injection, and SQLi | • AWSManagedRulesCommonRuleSet, KnownBadInputsRuleSet, and SQLiRuleSet are enabled on the Web ACL.<br>• No legitimate traffic is blocked during staging tests. |
+| WAF-02   | Sec Ops | to prevent traffic from known malicious IPs and anonymizers | • AmazonIpReputationList and AnonymousIpList rule groups are enabled.<br>• Requests from Tor exit nodes return 403. |
+| WAF-03   | Sec Ops | to throttle brute-force attempts against the login endpoint | • A rate-based rule limits `/api/auth/login` to 100 requests per IP per 5 minutes.<br>• Excessive requests receive 429 or 403. |
+| WAF-04   | Admin   | to restrict access to North America only | • Geo-match rule allows `US` and `CA`; other country codes are blocked.<br>• Override switch exists to disable the rule in emergencies. |
+| WAF-05   | Sec Ops | to enforce correct Host headers and prevent DNS rebinding | • Custom header-match rule blocks requests with a `Host` header that does not equal `mentalhealthaide.com`. |
 
 # Implementing in future
 
@@ -194,22 +199,22 @@ Enable practitioners and admins to export and import client data for interoperab
 | ID    | As a…         | I want / So that                                      | Acceptance Criteria |
 |-------|---------------|-------------------------------------------------------|---------------------|
 | AI-01 | Practitioner  | to see automatic risk predictions for my clients      | • Dashboard or client profile displays a risk level (e.g., Low/Medium/High) based on recent session notes, mood ratings, and appointment attendance.<br>• Risk is calculated using simple, transparent rules (e.g., multiple low mood scores, missed appointments). |
-| AI-02 | Practitioner  | to understand why a client is flagged as high risk    | • The UI shows which factors contributed to the risk score (e.g., “3 low mood notes in last 2 weeks”). |
+| AI-02 | Practitioner  | to understand why a client is flagged as high risk    | • The UI shows which factors contributed to the risk score (e.g., "3 low mood notes in last 2 weeks"). |
 
 ## Natural Language Processing (NLP) for Notes – User Stories
 | ID    | As a…         | I want / So that                                      | Acceptance Criteria |
 |-------|---------------|-------------------------------------------------------|---------------------|
 | NLP-01| Practitioner  | to get key insights or summaries from session notes   | • After saving a session note, the system highlights key topics, mood indicators, or action items extracted from the text. |
-| NLP-02| Practitioner  | to see suggested tags or categories for notes         | • When writing or viewing a note, suggested tags (e.g., “anxiety”, “medication”, “follow-up”) are displayed based on NLP analysis. |
+| NLP-02| Practitioner  | to see suggested tags or categories for notes         | • When writing or viewing a note, suggested tags (e.g., "anxiety", "medication", "follow-up") are displayed based on NLP analysis. |
 
 ## Real-Time Translation (API integration) – User Stories
 | ID    | As a…         | I want / So that                                      | Acceptance Criteria |
 |-------|---------------|-------------------------------------------------------|---------------------|
 | RT-01 | Practitioner  | to communicate with clients in their preferred language| • Messages and session notes can be translated in real time using a translation API.<br>• The user can select a target language for translation. |
-| RT-02 | Client        | to read messages from my care team in my own language | • When a message is received, the client can view it in their preferred language with a “Translate” button. |
+| RT-02 | Client        | to read messages from my care team in my own language | • When a message is received, the client can view it in their preferred language with a "Translate" button. |
 
 ## Telehealth Integration (video, basic) – User Stories
 | ID    | As a…         | I want / So that                                      | Acceptance Criteria |
 |-------|---------------|-------------------------------------------------------|---------------------|
-| TH-01 | Practitioner  | to start a secure video session with a client         | • Each appointment or client profile has a “Start Video Session” button that launches a video call (using a service like Twilio or Jitsi). |
+| TH-01 | Practitioner  | to start a secure video session with a client         | • Each appointment or client profile has a "Start Video Session" button that launches a video call (using a service like Twilio or Jitsi). |
 | TH-02 | Client        | to join a scheduled video session easily              | • Clients receive a link or button to join their telehealth session at the scheduled time.<br>• Video session is secure and HIPAA-compliant. |

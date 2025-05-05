@@ -1,0 +1,38 @@
+# terraform/envs/prod/terraform.tfvars
+
+# Database credentials (these will be stored in Secrets Manager)
+db_username = "prod_db_user"
+db_password = "prod_db_password_change_me"
+db_name     = "mental_health_prod"
+
+# AWS region
+aws_region = "us-east-1"
+
+# VPC and networking
+vpc_cidr = "10.20.0.0/16"
+public_subnet_cidrs  = ["10.20.1.0/24", "10.20.2.0/24"]
+private_subnet_cidrs = ["10.20.101.0/24", "10.20.102.0/24"]
+
+# ECS/Backend
+backend_container_port = 4000
+
+# Container Image
+container_image = 
+
+# Domain names
+domain_name = "mentalhealthaide.com"
+frontend_domain = "app.mentalhealthaide.com"
+api_domain = "api.mentalhealthaide.com"
+
+# JWT secret (will be stored in Secrets Manager)
+jwt_secret = "prod_super_secret_jwt_key_change_me"
+
+# Any other secrets (e.g., third-party API keys)
+openai_api_key = "prod_openai_key_change_me"
+twilio_account_sid = "prod_twilio_sid_change_me"
+twilio_auth_token = "prod_twilio_token_change_me"
+twilio_phone_number = "+1234567890" 
+
+# rotation_lambda
+db_rotation_lambda_arn  = null
+jwt_rotation_lambda_arn = null

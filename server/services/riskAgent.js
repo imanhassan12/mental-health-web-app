@@ -1,11 +1,11 @@
 const { OpenAI } = require('openai');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 /**
  * Multi-turn reasoning: The agent will first summarize the data, then ask itself what risk factors are present, then decide on a risk level, and finally explain its reasoning.
  */
 async function getRiskPrediction({ sessionNotes, moodRatings, appointments }) {
+  // Lazy init: always use the latest OPENAI_API_KEY
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   // Step 1: Summarize the data
   const summaryPrompt = `You are a clinical mental health assistant. Summarize the following session notes and mood ratings for a mental health client. Be concise, objective, and professional.\nSession Notes: ${sessionNotes.map(n => n.content).join(' | ')}\nMood Ratings: ${moodRatings.join(', ')}\nMissed Appointments: ${appointments.filter(a => a.status === 'missed').length}`;
   const summaryRes = await openai.chat.completions.create({

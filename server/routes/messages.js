@@ -6,14 +6,13 @@ const jwt = require('jsonwebtoken');
 const { Parser } = require('json2csv');
 const auditLog = require('../utils/auditLogger');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SECRET_KEY';
-
 // Helper: Extract user from JWT
 function getUserFromReq(req) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return null;
   try {
     const token = auth.split(' ')[1];
+    const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SECRET_KEY';
     return jwt.verify(token, JWT_SECRET);
   } catch {
     return null;

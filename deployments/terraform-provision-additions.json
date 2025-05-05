@@ -1,0 +1,146 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "S3EncryptionAndOAC",
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutBucketVersioning",
+          "s3:PutEncryptionConfiguration",
+          "s3:PutBucketAcl",
+          "s3:PutBucketPolicy"
+        ],
+        "Resource": "arn:aws:s3:::mentalhealthaide-*"
+      },
+  
+      {
+        "Sid": "ACMCerts",
+        "Effect": "Allow",
+        "Action": [
+          "acm:RequestCertificate",
+          "acm:DeleteCertificate",
+          "acm:DescribeCertificate",
+          "acm:AddTagsToCertificate"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "CloudFront",
+        "Effect": "Allow",
+        "Action": [
+          "cloudfront:CreateDistribution",
+          "cloudfront:UpdateDistribution",
+          "cloudfront:DeleteDistribution",
+          "cloudfront:GetDistribution*",
+          "cloudfront:CreateOriginAccessControl",
+          "cloudfront:UpdateOriginAccessControl",
+          "cloudfront:DeleteOriginAccessControl",
+          "cloudfront:TagResource",
+          "cloudfront:UntagResource"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "WAFv2",
+        "Effect": "Allow",
+        "Action": [
+          "wafv2:CreateWebACL",
+          "wafv2:UpdateWebACL",
+          "wafv2:DeleteWebACL",
+          "wafv2:PutLoggingConfiguration",
+          "wafv2:Get*",
+          "wafv2:List*"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "CognitoIdP",
+        "Effect": "Allow",
+        "Action": [
+          "cognito-idp:CreateUserPool",
+          "cognito-idp:UpdateUserPool",
+          "cognito-idp:DeleteUserPool",
+          "cognito-idp:CreateUserPoolClient",
+          "cognito-idp:UpdateUserPoolClient",
+          "cognito-idp:DeleteUserPoolClient",
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:TagResource",
+          "cognito-idp:UntagResource"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "Inspector2Enable",
+        "Effect": "Allow",
+        "Action": [
+          "inspector2:Enable",
+          "inspector2:Disable",
+          "inspector2:BatchGetAccountStatus",
+          "inspector2:List*"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "SecretsManager",
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:CreateSecret",
+          "secretsmanager:DeleteSecret",
+          "secretsmanager:PutSecretValue",
+          "secretsmanager:TagResource",
+          "secretsmanager:DescribeSecret"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:mentalhealthaide*",
+          "arn:aws:secretsmanager:*:*:secret:*/openai-api-key*"
+        ]
+      },
+  
+      {
+        "Sid": "KMS",
+        "Effect": "Allow",
+        "Action": [
+          "kms:CreateKey",
+          "kms:ScheduleKeyDeletion",
+          "kms:TagResource",
+          "kms:DescribeKey"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "CloudTrail",
+        "Effect": "Allow",
+        "Action": [
+          "cloudtrail:CreateTrail",
+          "cloudtrail:DeleteTrail",
+          "cloudtrail:UpdateTrail",
+          "cloudtrail:GetTrail",
+          "cloudtrail:GetTrailStatus",
+          "cloudtrail:StartLogging",
+          "cloudtrail:StopLogging"
+        ],
+        "Resource": "arn:aws:cloudtrail:*:*:trail/mentalhealthaide-*"
+      },
+  
+      {
+        "Sid": "CloudWatchLogs",
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:PutRetentionPolicy",
+          "logs:TagResource",
+          "logs:DescribeLogGroups"
+        ],
+        "Resource": "arn:aws:logs:*:*:log-group:mentalhealthaide-*"
+      }
+  
+    ]
+  }

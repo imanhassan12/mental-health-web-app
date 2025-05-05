@@ -5,6 +5,7 @@ import '../styles/TasksPage.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import messageService from '../services/message.service';
+import { backendUrl } from '../services/api';
 
 const statusColumns = [
   { key: 'open', label: 'Open' },
@@ -40,7 +41,7 @@ const TasksPage = () => {
     api.get('/tasks').then(res => setTasks(res.data));
     api.get('/messages/practitioners').then(res => setPractitioners(res.data));
     api.get('/clients').then(res => setClients(res.data));
-    const socket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000');
+    const socket = io(backendUrl);
     socket.on('task-new', (task) => setTasks(prev => [task, ...prev]));
     socket.on('task-updated', (task) => setTasks(prev => prev.map(t => t.id === task.id ? task : t)));
     return () => socket.disconnect();

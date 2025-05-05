@@ -1,0 +1,339 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+  
+        {
+        "Sid": "ACMTagAPIs",
+        "Effect": "Allow",
+        "Action": [
+          "acm:ListTagsForCertificate",
+          "acm:AddTagsToCertificate",
+          "acm:RemoveTagsFromCertificate"
+        ],
+        "Resource": "arn:aws:acm:*:*:certificate/*"
+      },
+      {
+        "Sid": "CloudFrontReadOAC",
+        "Effect": "Allow",
+        "Action": [
+          "cloudfront:GetOriginAccessControl",
+          "cloudfront:ListOriginAccessControls"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "S3CreateBuckets",
+        "Effect": "Allow",
+        "Action": [
+          "s3:CreateBucket",
+          "s3:PutBucketAcl",
+          "s3:PutBucketPolicy"
+        ],
+        "Resource": [
+          "arn:aws:s3:::mentalhealthaide-*"
+        ]
+      },
+      {
+        "Sid": "CognitoDescribePool",
+        "Effect": "Allow",
+        "Action": [
+          "cognito-idp:GetUserPoolMfaConfig",
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:ListUserPoolClients"
+        ],
+        "Resource": "*"
+      },
+
+      {
+        "Sid": "ECRRepoCreate",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:CreateRepository",
+          "ecr:TagResource",
+          "ecr:DeleteRepository",
+          "ecr:DescribeRepositories"
+        ],
+        "Resource": "arn:aws:ecr:*:*:repository/mentalhealthaide-*"
+      },
+      {
+        "Sid": "ECSCreate",
+        "Effect": "Allow",
+        "Action": [
+          "ecs:CreateCluster",
+          "ecs:DeleteCluster",
+          "ecs:DescribeClusters",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DeregisterTaskDefinition",
+          "ecs:CreateService",
+          "ecs:UpdateService",
+          "ecs:DeleteService"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "IAMRolePolicy",
+        "Effect": "Allow",
+        "Action": [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:TagRole",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:PassRole",
+          "iam:CreateServiceLinkedRole"
+        ],
+        "Resource": [
+          "arn:aws:iam::*:role/mentalhealthaide-*",
+          "arn:aws:iam::*:policy/mentalhealthaide-*",
+          "arn:aws:iam::*:role/aws-service-role/*"
+        ]
+      },
+  
+      {
+        "Sid": "InspectorEnable",
+        "Effect": "Allow",
+        "Action": [
+          "inspector2:Enable",
+          "inspector2:Disable",
+          "inspector2:ListAccountPermissions",
+          "inspector2:ListCoverage"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "KMSEnableRotation",
+        "Effect": "Allow",
+        "Action": [
+          "kms:EnableKeyRotation",
+          "kms:GetKeyRotationStatus"
+        ],
+        "Resource": "arn:aws:kms:*:*:key/*"
+      },
+  
+      {
+        "Sid": "Route53Zone",
+        "Effect": "Allow",
+        "Action": [
+          "route53:CreateHostedZone",
+          "route53:DeleteHostedZone",
+          "route53:GetHostedZone",
+          "route53:ChangeResourceRecordSets",
+          "route53:ListHostedZones"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "SecretsGetPolicy",
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetResourcePolicy"
+        ],
+        "Resource": "arn:aws:secretsmanager:*:*:secret:mentalhealthaide/*"
+      },
+  
+      {
+        "Sid": "EC2VpcCore",
+        "Effect": "Allow",
+        "Action": [
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:CreateSubnet",
+          "ec2:DeleteSubnet",
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:CreateRouteTable",
+          "ec2:AssociateRouteTable",
+          "ec2:AllocateAddress"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "ACMReadTags",
+        "Effect": "Allow",
+        "Action": "acm:ListTagsForCertificate",
+        "Resource": "arn:aws:acm:*:*:certificate/*"
+      },
+      {
+        "Sid": "CloudFrontGetOAC",
+        "Effect": "Allow",
+        "Action": [
+          "cloudfront:GetOriginAccessControl",
+          "cloudfront:ListOriginAccessControls"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "CognitoReadPoolConfig",
+        "Effect": "Allow",
+        "Action": [
+          "cognito-idp:GetUserPoolMfaConfig",
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:ListUserPoolClients"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "KMSGetPolicy",
+        "Effect": "Allow",
+        "Action": "kms:GetKeyPolicy",
+        "Resource": "arn:aws:kms:*:*:key/*"
+      },
+      {
+        "Sid": "S3ReadBucketPolicyAndTags",
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetBucketPolicy",
+          "s3:GetBucketTagging"
+        ],
+        "Resource": "arn:aws:s3:::mentalhealthaide-*"
+      },
+  
+      {
+        "Sid": "CloudWatchLogsCreate",
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:PutRetentionPolicy",
+          "logs:ListTagsLogGroup",
+          "logs:TagResource"
+        ],
+        "Resource": "arn:aws:logs:*:*:log-group:mentalhealthaide-*"
+      },
+  
+      {
+        "Sid": "KMSForLogsAndSecrets",
+        "Effect": "Allow",
+        "Action": [
+          "kms:CreateAlias",
+          "kms:DescribeKey",
+          "kms:ListAliases",
+          "kms:ListResourceTags",
+          "kms:TagResource",
+          "kms:GenerateDataKey*",
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:CreateGrant"
+        ],
+        "Resource": "arn:aws:kms:*:*:key/*"
+      },
+  
+      {
+        "Sid": "CognitoCreateDomain",
+        "Effect": "Allow",
+        "Action": [
+          "cognito-idp:CreateUserPoolDomain",
+          "cognito-idp:DeleteUserPoolDomain"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "ECRListTags",
+        "Effect": "Allow",
+        "Action": "ecr:ListTagsForResource",
+        "Resource": "arn:aws:ecr:*:*:repository/mentalhealthaide-*"
+      },
+  
+      {
+        "Sid": "IAMRead",
+        "Effect": "Allow",
+        "Action": [
+          "iam:GetRole",
+          "iam:GetPolicy",
+          "iam:GetRolePolicy",
+          "iam:ListAttachedRolePolicies"
+        ],
+        "Resource": [
+          "arn:aws:iam::*:role/mentalhealthaide-*",
+          "arn:aws:iam::*:policy/mentalhealthaide-*"
+        ]
+      },
+  
+      {
+        "Sid": "Route53GetChange",
+        "Effect": "Allow",
+        "Action": "route53:GetChange",
+        "Resource": "arn:aws:route53:::change/*"
+      },
+  
+      {
+        "Sid": "EC2CreateAndDescribe",
+        "Effect": "Allow",
+        "Action": [
+          "ec2:CreateTags",
+          "ec2:DescribeAddresses",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeRouteTables",
+          "ec2:DescribeInternetGateways",
+          "ec2:DescribeNatGateways"
+        ],
+        "Resource": "*"
+      },
+  
+      {
+        "Sid": "SecretsCreate",
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:CreateSecret",
+          "secretsmanager:PutSecretValue",
+          "secretsmanager:TagResource",
+          "secretsmanager:GetResourcePolicy"
+        ],
+        "Resource": "arn:aws:secretsmanager:*:*:secret:mentalhealthaide*"
+      },
+      {
+        "Sid": "S3GetBucketAcl",
+        "Effect": "Allow",
+        "Action": "s3:GetBucketAcl",
+        "Resource": [
+          "arn:aws:s3:::mentalhealthaide-dev-cloudtrail-logs",
+          "arn:aws:s3:::mentalhealthaide-dev-frontend"
+        ]
+      },
+  
+      {
+        "Sid": "IAMListInlineAndPolicyVersion",
+        "Effect": "Allow",
+        "Action": [
+          "iam:ListRolePolicies",
+          "iam:GetRolePolicy",
+          "iam:GetPolicyVersion"
+        ],
+        "Resource": [
+          "arn:aws:iam::*:role/mentalhealthaide-*",
+          "arn:aws:iam::*:policy/mentalhealthaide-*"
+        ]
+      },
+  
+      {
+        "Sid": "Route53ListTags",
+        "Effect": "Allow",
+        "Action": "route53:ListTagsForResource",
+        "Resource": "arn:aws:route53:::hostedzone/*"
+      },
+  
+      {
+        "Sid": "EC2DescribeAddressesAttribute",
+        "Effect": "Allow",
+        "Action": "ec2:DescribeAddressesAttribute",
+        "Resource": "*"
+      },
+      {
+        "Sid": "S3GetWildcard",
+        "Effect": "Allow",
+        "Action": "s3:Get*",
+        "Resource": [
+          "arn:aws:s3:::mentalhealthaide-dev-cloudtrail-logs",
+          "arn:aws:s3:::mentalhealthaide-dev-frontend"
+        ]
+      }
+    ]
+  }

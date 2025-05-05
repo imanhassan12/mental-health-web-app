@@ -40,3 +40,10 @@ Thumbs.db
 # Docker volumes
 /mysql_data
 
+# Terraform
+terraform/envs/*/terraform.tfvars
+
+# Terraform backend config (do not commit remote state config)
+terraform/envs/*/backend.conf
+*/.terraform/*
+terraform/terraform.tfvars

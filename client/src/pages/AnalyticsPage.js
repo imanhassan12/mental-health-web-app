@@ -3,6 +3,7 @@ import { Bar } from 'react-chartjs-2';
 import api from '../services/api';
 import AuthService from '../services/auth.service';
 import '../styles/AnalyticsPage.css';
+import { backendUrl } from '../services/api';
 
 const AnalyticsPage = () => {
   const [data, setData] = useState([]);
@@ -58,8 +59,8 @@ const AnalyticsPage = () => {
   };
 
   const handleExport = () => {
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
-    downloadFile(`${backendUrl}/api/analytics/engagement-by-diagnosis/csv`, 'engagement-by-diagnosis.csv');
+    const urlBase = backendUrl;
+    downloadFile(`${urlBase}/api/analytics/engagement-by-diagnosis/csv`, 'engagement-by-diagnosis.csv');
   };
 
   return (

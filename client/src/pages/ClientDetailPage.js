@@ -8,6 +8,7 @@ import AuthService from '../services/auth.service';
 import '../styles/ClientDetailPage.css';
 import { FaVideo } from 'react-icons/fa';
 import Modal from 'react-modal';
+import { backendUrl } from '../services/api';
 
 const ClientDetailPage = () => {
   const { clientId } = useParams();
@@ -165,7 +166,6 @@ const ClientDetailPage = () => {
             className="btn small"
             title="Export client data as CSV for use in other systems."
             onClick={() => {
-              const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
               downloadFile(`${backendUrl}/api/clients/${clientId}/export/csv`, `client-${clientId}.csv`);
             }}
           >
@@ -175,7 +175,6 @@ const ClientDetailPage = () => {
             className="btn small"
             title="Export client data as FHIR (Fast Healthcare Interoperability Resources) JSON."
             onClick={() => {
-              const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
               downloadFile(`${backendUrl}/api/clients/${clientId}/export/fhir`, `client-${clientId}.json`);
             }}
           >

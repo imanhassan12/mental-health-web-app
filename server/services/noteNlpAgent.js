@@ -1,13 +1,13 @@
 const { OpenAI } = require('openai');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 /**
  * Analyze a session note for summary, key topics, mood indicators, action items, and suggested tags.
  * @param {string} noteText
  * @returns {Promise<{summary: string, keyTopics: string[], moodIndicators: string[], actionItems: string[], suggestedTags: string[]}>}
  */
 async function analyzeNote(noteText) {
+  // Lazy init: always use the latest OPENAI_API_KEY
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const prompt = `You are a clinical documentation assistant. Given the following session note, extract:
 - A concise summary (1-2 sentences)
 - Key topics (comma-separated)

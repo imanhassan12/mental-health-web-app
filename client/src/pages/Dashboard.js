@@ -18,6 +18,7 @@ import FullCalendar from '../components/FullCalendar'; // Updated to use FullCal
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { io } from 'socket.io-client';
 import AlertService from '../services/alert.service';
+import { backendUrl } from '../services/api';
 
 // Register Chart.js components
 ChartJS.register(
@@ -79,7 +80,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const socket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000');
+    const socket = io(backendUrl);
     const requestNotif = () => {
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
